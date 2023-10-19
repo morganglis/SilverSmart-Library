@@ -1,4 +1,5 @@
 # SilverSmart-Library
+<img src="https://github.com/morganglis/SilverSmart-Library/assets/112116221/87435c18-7d66-4298-b2e9-e43b4eb7b226" width="300" height="300" />
 
 ## Team:
 * David Hollock
