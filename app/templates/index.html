@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silversmart Library</title>
+   <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+
+
+</head>
+<body>
+    <div class="main-content">
+    <div class="container">
+
+        <h1>Hello World!</h1>
+        <h2>Future Home Of Silversmart Library!</h2>
+
+        <!-- Students Table -->
+        <h3>Student List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.email }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Books Table -->
+        <h3>Book Catalog</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{ book.id }}</td>
+                    <td>{{ book.title }}</td>
+                    <td>{{ book.author }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Checkouts Table -->
+        <h3>Current Checkouts</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Checkout ID</th>
+                    <th>Student ID</th>
+                    <th>Book ID</th>
+                    <th>Checkout Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for checkout in checkouts %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ checkout.student_id }}</td>
+                    <td>{{ checkout.book_id }}</td>
+                    <td>{{ checkout.checkout_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <form action="/add_student" method="post">
+            <input type="number" name="student_id" required placeholder="Enter student's ID">
+            <input type="text" name="name" required placeholder="Enter student's name">
+            <input type="email" name="email" required placeholder="Enter student's email">
+            <input type="submit" value="Add Student">
+        </form>
+    </div>
+    </div>
+</body>
+</html>
