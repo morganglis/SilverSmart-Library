@@ -35,7 +35,7 @@
 - flask db migrate
 - flask db upgrade
 - run seed_database.py
-- Seed Database: In web browser, run /seed_checkouts after local host (ex. http://127.0.0.1:5000/seed_checkouts)
+- Seed Database: In a web browser, run /seed_checkouts after the local host (ex. http://127.0.0.1:5000/seed_checkouts)
 - flask run
   
 ### Branches
