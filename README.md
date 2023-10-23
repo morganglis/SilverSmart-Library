@@ -25,12 +25,12 @@
 
 ## How To Build Project
 
-# Cloning Repo
+### Cloning Repo
 - Open your IDE
 - Copy Repo Clone Link
 - Paste into IDE
   
-# Database
+### Database
 - flask db init
 - flask db migrate
 - flask db upgrade
@@ -38,4 +38,4 @@
 - Seed Database: In web browser, run /seed_checkouts after local host (ex. http://127.0.0.1:5000/seed_checkouts)
 - flask run
   
-# Branches
+### Branches
