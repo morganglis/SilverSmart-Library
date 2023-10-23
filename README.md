@@ -22,3 +22,20 @@
 ## Task Management & Documentation: 
 * Jira
 * Confluence
+
+## How To Build Project
+
+# Cloning Repo
+- Open your IDE
+- Copy Repo Clone Link
+- Paste into IDE
+  
+# Database
+- flask db init
+- flask db migrate
+- flask db upgrade
+- run seed_database.py
+- Seed Database: In web browser, run /seed_checkouts after local host (ex. http://127.0.0.1:5000/seed_checkouts)
+- flask run
+  
+# Branches
