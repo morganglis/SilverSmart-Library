@@ -1,13 +1,51 @@
+import os
+import logging
 from flask import Flask
+from logging.handlers import RotatingFileHandler
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from config import Config
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config.from_object("config")
+# Load configuration from object
+app.config.from_object(Config)
+
+# Initialize database
 db = SQLAlchemy(app)
+
+# Initialize migration
 migrate = Migrate(app, db)
+
+
+def create_app(config_class=Config):
+    if not app.debug and not app.testing:
+        if app.config["LOG_TO_STDOUT"]:
+            stream_handler = logging.StreamHandler()
+            stream_handler.setLevel(logging.INFO)
+            app.logger.addHandler(stream_handler)
+        else:
+            if not os.path.exists("logs"):
+                os.mkdir("logs")
+            file_handler = RotatingFileHandler(
+                "logs/microblog.log", maxBytes=10240, backupCount=10
+            )
+            file_handler.setFormatter(
+                logging.Formatter(
+                    "%(asctime)s %(levelname)s: %(message)s "
+                    "[in %(pathname)s:%(lineno)d]"
+                )
+            )
+            file_handler.setLevel(logging.INFO)
+            app.logger.addHandler(file_handler)
+
+        app.logger.setLevel(logging.INFO)
+        app.logger.info("Microblog startup")
+
+    return app
+
 
 from app import routes, model
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()
