@@ -99,7 +99,7 @@ venv.bak/
 
 # Database files
 *.sqlite
-#*.db
+*.db
 
 # OS generated
 .DS_Store
