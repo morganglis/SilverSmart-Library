@@ -86,6 +86,10 @@
             <input type="email" name="email" required placeholder="Enter student's email">
             <input type="submit" value="Add Student">
         </form>
+        <br>
+    <a href="{{ url_for('seed_db') }}" class="btn btn-primary" style="background-color: white; color: black;">Populate Database</a>
+    <a href="{{ url_for('seed_checkouts') }}" class="btn btn-primary" style="background-color: white; color: black;">Populate Checkouts</a>
+
     </div>
     </div>
 </body>

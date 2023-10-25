@@ -43,6 +43,47 @@ def add_student():
         return redirect(url_for('library'))
 
 
+@app.route('/seed-db')
+def seed_db():
+    # Check and create Students if they don't exist
+    if not Student.query.get(1000):
+        student1 = Student(id=1000, name="John Wick", email="jwick@aol.com")
+        db.session.add(student1)
+
+    if not Student.query.get(1001):
+        student2 = Student(id=1001, name="Hank Hill", email="hhill@gmail.com")
+        db.session.add(student2)
+
+    if not Student.query.get(1002):
+        student3 = Student(id=1002, name="Penny Smith", email="psmith@hotmail.com")
+        db.session.add(student3)
+
+    # Check and create Books if they don't exist
+    if not Book.query.get(125):
+        book1 = Book(id=125, title="Ham and Eggs A SCRUM Love Story", author="Jeff Hams")
+        db.session.add(book1)
+
+    if not Book.query.get(605):
+        book2 = Book(id=605, title="Frankenstein", author="Mary Shelly")
+        db.session.add(book2)
+
+    if not Book.query.get(620):
+        book3 = Book(id=620, title="Dracula", author="Bram Stoker")
+        db.session.add(book3)
+
+    if not Book.query.get(652):
+        book4 = Book(id=652, title="Call of Cthulhu", author="H.P. Lovecraft")
+        db.session.add(book4)
+
+    if not Book.query.get(998):
+        book5 = Book(id=998, title="IT", author="Stephen King")
+        db.session.add(book5)
+
+    db.session.commit()  # Commit changes up to this point
+
+
+    return redirect(url_for('library'))  # Assuming 'index' is a route that displays your main page
+
 @app.route('/seed_checkouts')
 def seed_checkouts():
     # Fetch students and books from the database
@@ -64,6 +105,6 @@ def seed_checkouts():
     # Commit the changes to the database
     try:
         db.session.commit()
-        return "Checkouts successfully added", 200
+        return redirect(url_for('library'))
     except Exception as e:
         return f"An error occurred: {e}", 500
