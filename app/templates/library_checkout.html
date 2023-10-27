@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    {% include 'header.html' %}
+    <main>
+        <div class="main-content">
+            <div class="container">
+                <h1>Checkout</h1>
+                <div class="action-buttons">
+                    <form id="student-id-form">
+                        <label for="student-id">Enter Student ID:</label>
+                        <input type="text" id="student-id" name="student-id" placeholder="Student ID">
+                        <button type="button" id="confirm-button">Confirm</button>
+                    </form>
+                </div>
+                <div id="confirmation-messages">
+                    <!-- Messages related to confirmation can be displayed here -->
+                </div>
+                <div>
+                    <p>Current DateTime: <span id="current-time"></span></p>
+                    <p>Due Date: <span id="due-back"></span></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+</body>
+</html>
+
