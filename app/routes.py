@@ -14,6 +14,12 @@ def library():
 
     return render_template('index.html', students=students, books=books, checkouts=checkouts_data)
 
+
+
+@app.route('/checkout')
+def checkout():
+    return render_template('library_checkout.html')
+
 @app.route('/add_student', methods=['POST'])
 def add_student():
     # Get the form data
