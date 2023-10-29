@@ -1,10 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer_styles.css') }}">
+    <title></title>
 </head>
 <body>
     <footer>
-        <p>Silversmart Library</p>
+        <div class="inner_footer">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library logo">
+                <img src="{{ url_for('static', filename='images/Social_icons.png') }}" alt="Silversmart Socials">
+            </div>
+
+            <div class="footer_third">
+                <h1>Site Info</h1>
+                <a href="#">Accessibility</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#"> Terms or Payment</a>
+                <a href="#"> Terms of Use</a>
+            </div>
+
+            <div class="footer_third">
+                <h1>Support Us</h1>
+                <a href="#">Friends of the Library</a>
+                <a href="#">Volunteer</a>
+                <a href="#">Library Foundation</a>
+                <a href="#">Donate</a>
+            </div>
+        </div>
     </footer>
 </body>
 </html>
