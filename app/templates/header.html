@@ -1,10 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
+    <title></title>
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo" class="logo" style="width: 15%; height: auto; left: 100px;">
+        <div class="inner_header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
+            </div>
+
+            <ul class="tool_bar">
+                <a href="#"><li>Home</li></a>
+                <a href="#"><li>About</li></a>
+                <a href="{{ url_for('checkout') }}"><li>Check Out</li></a>
+                <a href="#"><li>Check In</li></a>
+                <a href="#"><li>Log In/Create Account</li></a>
+            </ul>
+
+        </div>
     </header>
 </body>
 </html>

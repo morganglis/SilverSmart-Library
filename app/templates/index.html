@@ -13,8 +13,12 @@
     <div class="main-content">
     <div class="container">
 
-        <h1>Hello World! hello a test</h1>
+        <h1>Hello World!</h1>
         <h2>Future Home Of Silversmart Library!</h2>
+
+        <div>
+            <a href="{{ url_for("checkout")}}">Check Out</a>
+        </div>
 
         <!-- Students Table -->
         <h3>Student List</h3>
@@ -86,11 +90,6 @@
             <input type="text" name="name" required placeholder="Enter student's name">
             <input type="email" name="email" required placeholder="Enter student's email">
             <input type="submit" value="Add Student">
-        </form>
-
-        <form>
-            <button id="add_book_button" >Add Book</button>
-            <script src="/scripts/main.js"></script>
         </form>
     </div>
     </div>
