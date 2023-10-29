@@ -1,5 +1,4 @@
 from app import db
-from datetime import datetime
 
 class Patron(db.Model):
     patronID = db.Column(db.SmallInteger, primary_key=True)
