@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
-    <title></title>
-</head>
-<body>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <title>SilverSmart Library</title>
     <header>
-        <div class="inner_header">
-            <div class="logo">
-                <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
+        </div>
+        <div class="drop_down">
+            <button class="drop_button">=</button>
+            <div class="drop_content">
+                <a href="#">Check-In</a>
+                <a href="#">Check-Out</a>
             </div>
-
-            <ul class="tool_bar">
-                <a href="#"><li>Home</li></a>
-                <a href="#"><li>About</li></a>
-                <a href="{{ url_for('checkout') }}"><li>Check Out</li></a>
-                <a href="#"><li>Check In</li></a>
-                <a href="#"><li>Log In/Create Account</li></a>
-            </ul>
-
+        </div>
+        <div class="tool_bar">
+            <nav>
+                <ul>
+                    <button>Home</button>
+                    <button>About</button>
+                    <button>Login</button>
+                </ul>
+            </nav>
         </div>
     </header>
-</body>
-</html>
+</head>
