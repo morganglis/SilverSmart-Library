@@ -61,47 +61,68 @@ def library():
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
-    # Initialize a session for the checkout_items if it doesn't exist
     if 'checkout_items' not in session:
         session['checkout_items'] = []
 
     patron = None
+    is_expired = False
 
     if request.method == 'POST':
-        # Retrieve patron information
         patron_id = request.form.get('patronID')
         patron = Patron.query.get(patron_id)
+
         if not patron:
             flash('No patron found with this ID.', 'error')
             return redirect(url_for('checkout'))
+
+        # Calculate if the patron's ID is expired
+        is_expired = datetime.utcnow() > (patron.date_created + timedelta(days=2 * 365))
 
         # Renew Patron ID
         if 'renew' in request.form:
             patron.date_created = datetime.utcnow()
             db.session.commit()
             flash('Patron ID has been renewed.', 'success')
+            is_expired = False  # Update the expiration status after renewal
+
+        # If the card is expired and not being renewed, inform the user and prevent further actions
+        if is_expired:
+            flash('Your card has expired. Please renew your card.', 'error')
+            return redirect(url_for('checkout'))
+
+        # Check if the patron has already checked out the maximum number of items
+        if patron.itemsRented >= 20:
+            flash('You have reached the maximum number of items allowed to be checked out.', 'error')
+            return redirect(url_for('checkout'))
 
         # Handle Payment
         elif 'payment' in request.form:
-            payment = Decimal(request.form['payment'])
-            if payment > 0 and payment <= patron.acctBalance:
-                patron.acctBalance -= payment
-                db.session.commit()
-                flash(f'Payment of ${payment:.2f} received. New balance: ${patron.acctBalance:.2f}', 'success')
-            else:
-                flash('Invalid payment amount.', 'error')
+            payment_amount = request.form['payment']
+            try:
+                payment = Decimal(payment_amount)
+                if payment > 0 and payment <= patron.acctBalance:
+                    patron.acctBalance -= payment
+                    db.session.commit()
+                    flash(f'Payment of ${payment:.2f} received. New balance: ${patron.acctBalance:.2f}', 'success')
+                else:
+                    flash('Invalid payment amount.', 'error')
+            except ValueError:
+                flash('Invalid payment amount entered.', 'error')
 
         # Add Item to Checkout List
         elif 'add_item' in request.form:
             item_id = request.form.get('itemId')
             item = Item.query.get(item_id)
-            if item and not item.isCheckedOut:
+            if item and not item.isCheckedOut and patron.itemsRented < 20:
                 session['checkout_items'].append(item_id)
                 item.isCheckedOut = True  # Mark the item as checked out
+                patron.itemsRented += 1  # Increment the number of items rented by the patron
                 db.session.commit()  # Commit the change to the database
                 flash(f'Item {item_id} added to checkout list.', 'success')
             elif item and item.isCheckedOut:
                 flash(f'Item {item_id} is already checked out.', 'error')
+            elif patron.itemsRented >= 20:
+                flash('You cannot check out more than 20 items.', 'error')
             else:
                 flash(f'Item {item_id} not found.', 'error')
 
@@ -117,7 +138,6 @@ def checkout():
                         due_date = datetime.utcnow() + timedelta(days=item.item_type.rentDuration)
                         new_checkout = Checkout(patronID=patron.patronID, itemID=item.itemID, dueDate=due_date)
                         db.session.add(new_checkout)
-                        patron.itemsRented += 1  # Increment the number of items rented by the patron
                         due_dates.append(due_date.strftime('%Y-%m-%d'))
                 db.session.commit()
                 flash('Items checked out successfully.', 'success')
@@ -125,38 +145,29 @@ def checkout():
                 # Clear the session checkout_items after successful checkout
                 session.pop('checkout_items', None)
 
-                # Define 'items' here if it's not already defined in the correct scope.
-                # I am not sure if this is needed. Further testing is required.
-                items = {str(item.itemID): item for item in Item.query.all()}
-
-                # Generate receipt data using a loop
+                # Generate receipt data
                 receipt_data = []
                 for item_id, due_date_str in zip(checkout_items, due_dates):
-                    item = items.get(str(item_id))
+                    item = Item.query.get(item_id)
                     if item:
                         receipt_data.append({
                             'item_title': item.itemTitle,
                             'due_date': due_date_str
                         })
-                    else:
-                        receipt_data.append({
-                            'item_title': 'Item not found',
-                            'due_date': 'N/A'
-                        })
-                # Takes you to the receipt page
+
+                # Redirect to the receipt page with the necessary data
                 return render_template('receipt.html', patron=patron, receipt_data=receipt_data)
             else:
                 flash('No items to checkout.', 'error')
 
-
-
-    # For GET request or any redirections
+    # For GET requests or any other redirection
     items = {item.itemID: item for item in Item.query.all()}
-    return render_template('library_checkout.html',
-                           patron=patron, checkout_items=session.get('checkout_items', []),items=items)
+    return render_template('library_checkout.html', patron=patron, is_expired=is_expired,
+                           checkout_items=session.get('checkout_items', []),
+                           items=items)
 
 def seed_database():
-    # Clears out existing data and then seeds the database with data in this route.
+    # Clears out existing data and then seeds the database with data in this
 
     db.session.query(Checkout).delete()
     db.session.query(ItemAuthors).delete()
