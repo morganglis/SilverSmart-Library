@@ -23,9 +23,12 @@ main {
 
 .library_pics {
     flex: 1;
+    display: flex;
     padding: 20px;
     border: 1px solid black;
     margin: 10px;
+    flex-direction: column;
+    align-items: center;
 }
 
 .library_pics img {
@@ -56,15 +59,18 @@ main {
 }
 
 .books_in_stock {
+    display: flex;
     flex: 1;
     padding: 20px;
     border: 1px solid black;
     margin: 10px;
+    flex-direction: column;
+    align-items: center;
 }
 
 .books_in_stock img {
     margin: 10px;
-    max-width: 100%;
+    max-width: 90%;
     height: auto;
 }
 

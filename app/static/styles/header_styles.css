@@ -64,6 +64,7 @@ header {
 .tool_bar ul {
     list-style: none;
     display: flex;
+    color: black;
 }
 
 .tool_bar button {
