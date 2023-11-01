@@ -13,14 +13,14 @@
         <div class="drop_down">
             <button class="drop_button">=</button>
             <div class="drop_content">
-                <a href="#">Check-In</a>
                 <a href="{{ url_for('checkout') }}">Check-Out</a>
+                <a href="#">Check-In</a>   # Changed the order here since we are concerned with checkout at the moment
             </div>
         </div>
         <div class="tool_bar">
             <nav>
                 <ul>
-                    <button href="#">Home</button>
+                    <button> <a href="{{ url_for('library') }}">Home</a></button>   # Using button here but I still needed an a tag to make it work
                     <button href="#">About</button>
                 </ul>
             </nav>
