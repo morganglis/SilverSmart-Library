@@ -20,6 +20,10 @@ def library():
 def checkout():
     return render_template('library_checkout.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/add_student', methods=['POST'])
 def add_student():
     # Get the form data
