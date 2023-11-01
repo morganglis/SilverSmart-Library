@@ -6,26 +6,22 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
     <title>SilverSmart Library</title>
-    <header style="background-color: #948E99;">
+    <header>
         <div class="logo">
-            <a href="http://127.0.0.1:5000">
-                <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
-            </a>
+            <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
         </div>
         <div class="drop_down">
             <button class="drop_button">=</button>
             <div class="drop_content">
-                <a href="#">Check-In</a>
                 <a href="{{ url_for('checkout') }}">Check-Out</a>
+                <a href="#">Check-In</a>   # Changed the order here since we are concerned with checkout at the moment
             </div>
         </div>
         <div class="tool_bar">
             <nav>
                 <ul>
-                    <button href="#">Home</button>
-                    <a href="http://127.0.0.1:5000/about">
+                    <button> <a href="{{ url_for('library') }}">Home</a></button>   # Using button here but I still needed an a tag to make it work
                     <button href="#">About</button>
-                    </a>
                 </ul>
             </nav>
         </div>

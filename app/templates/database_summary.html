@@ -1,0 +1,93 @@
+{% include 'header.html' %}
+<body>
+    <h1>Database Summary</h1>
+
+    <h2>Patrons</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Balance</th>
+        </tr>
+        {% for patron in patrons %}
+        <tr>
+            <td>{{ patron.patronID }}</td>
+            <td>{{ patron.firstName }} {{ patron.lastName }}</td>
+            <td>{{ patron.email }}</td>
+            <td>{{ patron.phoneNum }}</td>
+            <td>${{ "%.2f"|format(patron.acctBalance) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Item Types</h2>
+    <table>
+        <tr>
+            <th>Type ID</th>
+            <th>Type Name</th>
+            <th>Rent Duration (days)</th>
+        </tr>
+        {% for item_type in item_types %}
+        <tr>
+            <td>{{ item_type.typeID }}</td>
+            <td>{{ item_type.typeName }}</td>
+            <td>{{ item_type.rentDuration }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Items</h2>
+    <table>
+        <tr>
+            <th>Item ID</th>
+            <th>Title</th>
+            <th>Publish Date</th>
+            <th>Branch</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.itemID }}</td>
+            <td>{{ item.itemTitle }}</td>
+            <td>{{ item.publishDate }}</td>
+            <td>{{ item.itemBranch }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Authors</h2>
+    <table>
+        <tr>
+            <th>Author ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+        </tr>
+        {% for author in authors %}
+        <tr>
+            <td>{{ author.authorID }}</td>
+            <td>{{ author.firstName }}</td>
+            <td>{{ author.lastName }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Checkouts</h2>
+    <table>
+        <tr>
+            <th>Checkout ID</th>
+            <th>Patron ID</th>
+            <th>Item ID</th>
+            <th>Due Date</th>
+        </tr>
+        {% for checkout in checkouts %}
+        <tr>
+            <td>{{ checkout.checkoutID }}</td>
+            <td>{{ checkout.patronID }}</td>
+            <td>{{ checkout.itemID }}</td>
+            <td>{{ checkout.dueDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+{% include 'footer.html' %}
