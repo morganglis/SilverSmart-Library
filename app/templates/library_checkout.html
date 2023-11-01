@@ -1,33 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Check Out</title>
-</head>
+{% include 'header.html' %}
 <body>
-    {% include 'header.html' %}
     <main>
-        <div class="main-content">
-            <div class="container">
+        <canvas id="bounceCanvas"></canvas>
+        <div class="checkout-main">
+            <div class="checkout-container">
                 <h1>Checkout</h1>
+                <br></br>
                 <div class="action-buttons">
                     <form id="student-id-form">
-                        <label for="student-id">Enter Student ID:</label>
-                        <input type="text" id="student-id" name="student-id" placeholder="Student ID">
-                        <button type="button" id="confirm-button">Confirm</button>
+                        <div id="input-container">
+                            <label>Enter Student ID: </label>
+                            <input type="number" class="section" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder = "####">
+                            <input type="number" class="section" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder = "####">
+                            <input type="number" class="section" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder = "####">
+                        </div>
+                        <br>
                     </form>
+                    <form id="book-id-form">
+                        <label for="book-id">Enter Book ID:</label>
+                        <input type="number" id="book-id" maxlengh="10" name="book-id" placeholder="Book ID">
+                    </form>
+                    <br>
+                    <button type="button" id="confirm-book-button" style="margin-left: 60px; font-size: 15px; padding: 5px 10px;">Complete Checkout</button>
+                    </br>
+                        </br>
                 </div>
                 <div id="confirmation-messages">
                     <!-- Messages related to confirmation can be displayed here -->
                 </div>
+
                 <div>
                     <p>Current DateTime: <span id="current-time"></span></p>
-                    <p>Due Date: <span id="due-back"></span></p>
+                    <div id="date-due-box" style="border: 1px solid #000; display: inline-block; padding: 5px;">
+                        <p>Due Date: <span id="due-back"></span></p>
+                    </div>
                 </div>
+
             </div>
         </div>
-    </main>
+        <script>
 
-    {% include 'footer.html' %}
+        const sections = document.querySelectorAll('.section');
+
+        sections.forEach((section, index) => {
+            section.addEventListener('input', (e) => {
+                if (e.target.value.length >= 4 && index < sections.length - 1) {
+                    sections[index + 1].focus();
+                }
+            });
+        });
+
+        // JavaScript code for the bouncing balls animation
+        const canvas = document.getElementById('bounceCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to match the window size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // The ball in question
+        class Ball {
+            constructor(x, y, radius, color, velocityX, velocityY) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.velocityX = velocityX;
+                this.velocityY = velocityY;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                this.draw();
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+
+                // Bounce off the edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.velocityX = -this.velocityX;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.velocityY = -this.velocityY;
+                }
+            }
+        }
+
+            const balls = [];
+            const numBalls = 50;
+
+            // Initialize random balls
+            for (let i = 0; i < numBalls; i++) {
+                const radius = Math.random() * 20 + 10; // Random radius
+                const x = Math.random() * (canvas.width - 2 * radius) + radius;
+                const y = Math.random() * (canvas.height - 2 * radius) + radius;
+                const color = getRandomColor();
+                const velocityX = (Math.random() - 0.5) * 4;
+                const velocityY = (Math.random() - 0.5) * 4;
+                balls.push(new Ball(x, y, radius, color, velocityX, velocityY));
+            }
+
+            // Ball random color
+            function getRandomColor() {
+                return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}`;
+            }
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                balls.forEach(ball => {
+                    ball.update();
+                });
+            }
+
+            animate();
+
+        </script>
+    </main>
 </body>
 </html>
+{% include 'footer.html' %}
 

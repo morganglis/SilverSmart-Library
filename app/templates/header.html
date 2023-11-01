@@ -6,9 +6,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
     <title>SilverSmart Library</title>
-    <header>
+    <header style="background-color: #948E99;">
         <div class="logo">
-            <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
+            <a href="http://127.0.0.1:5000">
+                <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
+            </a>
         </div>
         <div class="drop_down">
             <button class="drop_button">=</button>
@@ -21,7 +23,9 @@
             <nav>
                 <ul>
                     <button href="#">Home</button>
+                    <a href="http://127.0.0.1:5000/about">
                     <button href="#">About</button>
+                    </a>
                 </ul>
             </nav>
         </div>
