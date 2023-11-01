@@ -15,6 +15,8 @@ def seed_db_route():
 
 
 @app.route('/database-summary')
+# This is just a quick query to show the contents of the database and display it.
+# This is not part of the project. Just to help with debugging.
 def database_summary():
     patrons = Patron.query.all()
     item_types = ItemType.query.all()
@@ -34,7 +36,7 @@ def add_patron():
 
 @app.route('/create_patron', methods=['POST'])
 def create_patron():
-    # Get data from form submission
+    # Get data from form submission to create a new Patron
     patronID = request.form['patronID']
     firstName = request.form['firstName']
     lastName = request.form['lastName']
@@ -53,6 +55,7 @@ def create_patron():
 
 @app.route('/')
 def library():
+    # This is how we to the index page.
     return render_template('index.html')
 
 
@@ -114,7 +117,7 @@ def checkout():
                         due_date = datetime.utcnow() + timedelta(days=item.item_type.rentDuration)
                         new_checkout = Checkout(patronID=patron.patronID, itemID=item.itemID, dueDate=due_date)
                         db.session.add(new_checkout)
-                        patron.itemsRented += 1  # Assuming this increments the rented items count
+                        patron.itemsRented += 1  # Increment the number of items rented by the patron
                         due_dates.append(due_date.strftime('%Y-%m-%d'))
                 db.session.commit()
                 flash('Items checked out successfully.', 'success')
@@ -122,7 +125,8 @@ def checkout():
                 # Clear the session checkout_items after successful checkout
                 session.pop('checkout_items', None)
 
-                # Define 'items' here if it's not already defined in the correct scope
+                # Define 'items' here if it's not already defined in the correct scope.
+                # I am not sure if this is needed. Further testing is required.
                 items = {str(item.itemID): item for item in Item.query.all()}
 
                 # Generate receipt data using a loop
@@ -139,23 +143,21 @@ def checkout():
                             'item_title': 'Item not found',
                             'due_date': 'N/A'
                         })
-
+                # Takes you to the receipt page
                 return render_template('receipt.html', patron=patron, receipt_data=receipt_data)
             else:
                 flash('No items to checkout.', 'error')
 
-        # Other POST request actions can be handled here...
+
 
     # For GET request or any redirections
     items = {item.itemID: item for item in Item.query.all()}
     return render_template('library_checkout.html',
-                           patron=patron,
-                           checkout_items=session.get('checkout_items', []),
-                           items=items)
+                           patron=patron, checkout_items=session.get('checkout_items', []),items=items)
 
 def seed_database():
-    # Clear out existing data
-    # Warning: This will delete your existing data, use with caution.
+    # Clears out existing data and then seeds the database with data in this route.
+
     db.session.query(Checkout).delete()
     db.session.query(ItemAuthors).delete()
     db.session.query(Author).delete()
