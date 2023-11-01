@@ -1,9 +1,12 @@
-html {
-    height: 100%;
+*{ /* Baseline format for the header */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Times New Roman', sans-serif;
     background-color: #ebeff5;
     color: #000000;
     margin: 0;
@@ -20,18 +23,35 @@ body {
 
 
 .container {
+    font-family: Arial, sans-serif;
+    background-color: #282c34;
     text-align: center;
-    position: relative;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
+    /* background-image: url('library_pic_background.jpg');
+    background-size: cover;
+    background-repeat: repeat-y;
+    background-attachment: fixed; */
 }
 
-h1 {
+main {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
 
-    font-size: 3em;
-    text-align: left;
-    z-index: 2;
+.library_pics {
+    flex: 1;
+    display: flex;
+    padding: 20px;
+    border: 1px solid black;
+    margin: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.library_pics img {
+    margin: 10px;
+    max-width: 100%;
+    height: auto;
 }
 
 h2 {
@@ -39,37 +59,54 @@ h2 {
     text-align: left;
     z-index: 2;
     margin-bottom: 100px;
+
+}
+.library_pics button {
+    background-color: peru;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: transform 0.3s, background-color 0.3s;
 }
 
-h3 {
-    font-size: 2em;
-    z-index: 2;
-    position: relative;
-    margin-bottom: 20px;
+.library_pics button:hover {
+    background-color: orange;
+    transform: scale(1.1);
 }
 
-/* Table styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    color: #000;
-    background-color: #fff;
+.library_pics button:active {
+    background-color: chocolate;
+    transform: scale(0.9);
 }
 
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+.books_in_stock {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    border: 1px solid black;
+    margin: 10px;
+    flex-direction: column;
+    align-items: center;
 }
 
-th {
-    background-color: teal;
-    color: white;
+.books_in_stock img {
+    margin: 10px;
+    max-width: 90%;
+    height: auto;
 }
 
-tr:hover {
-    background-color: lightgray;
+.books_in_stock button {
+    background-color:peru;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: transform 0.3s, background-color 0.3s;
 }
 
 button {
@@ -110,4 +147,13 @@ input {
     table, th, td {
         font-size: 0.8em;
     }
+}
+.books_in_stock button:hover {
+    background-color: orange;
+    transform: scale(1.1);
+}
+
+.books_in_stock button:active {
+    background-color: chocolate;
+    transform: scale(0.9);
 }
