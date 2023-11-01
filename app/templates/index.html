@@ -1,16 +1,30 @@
+
 {% include 'header.html' %}
 <body>
-    <main>
-        <div class="library_pics">
-            <button href="#">Libaray Photos</button>
-            <img src="{{ url_for('static',filename='images/library_picture.png') }}" alt="Library Pictures">
-        </div>
+    <div class="main-content">
+        <div class="container">
 
-        <div class="books_in_stock">
-            <button href="#">Book Selection</button>
-            <img src="{{ url_for('static',filename='images/book_preview.png') }}" alt="Books in Stock">
-        </div>
-    </main>
+            <h1>Hello World!</h1>
+            <h2>Future Home Of Silversmart Library!</h2>
+
+            <form action="{{ url_for('seed_db_route') }}" method="post">
+                <input type="submit" value="Seed Database" />
+            </form>
+            <form action="{{ url_for('database_summary') }}" method="get">
+                <button type="submit">View Database Summary</button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+                    </div>
+    </div>
 </body>
-{% include 'footer.html' %}
 
+{% include 'footer.html' %}
