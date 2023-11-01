@@ -79,15 +79,13 @@ def checkout():
         is_expired = datetime.utcnow() > (patron.date_created + timedelta(days=2 * 365))
 
         # Renew Patron ID
-        # Renew Patron ID
         if 'renew' in request.form:
             patron.date_created = datetime.utcnow()
             db.session.commit()
             flash('Patron ID has been renewed.', 'success')
             is_expired = False  # Update the expiration status after renewal
-            # No redirect here, allow the code to continue and re-render the page with updated info
 
-        # The user should be able to see the renewal message and button before being redirected
+
         if is_expired:
             # Pass the is_expired to the template to show the renewal button
             return render_template('library_checkout.html', patron=patron, is_expired=is_expired)
