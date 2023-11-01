@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: 'Times New Roman', sans-serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
     background-color: #ebeff5;
     color: #000000;
     margin: 0;
@@ -23,7 +23,7 @@ body {
 
 
 .container {
-    font-family: Arial, sans-serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
     background-color: #ebeff5;
     text-align: center;
     /* background-image: url('library_pic_background.jpg');
@@ -44,41 +44,44 @@ main {
     padding: 20px;
     border: 1px solid black;
     margin: 10px;
+    border-radius: 10px;
     flex-direction: column;
     align-items: center;
 }
 
 .library_pics img {
     margin: 10px;
-    max-width: 100%;
+    max-width: 50%;
     height: auto;
 }
 
 h2 {
     font-size: 2.5em;
-    text-align: left;
+    text-align: center;
     z-index: 2;
     margin-bottom: 100px;
+    margin-top: 100px;
 
 }
 .library_pics button {
-    background-color: peru;
+    background-color: rgb(203, 210, 218);
     font-family: Georgia, 'Times New Roman', Times, serif;
     color: black;
     padding: 10px 20px;
     border: none;
+    border-radius: 10px;
     cursor: pointer;
     margin-bottom: 10px;
     transition: transform 0.3s, background-color 0.3s;
 }
 
 .library_pics button:hover {
-    background-color: orange;
+    background-color: rgb(203, 210, 218);
     transform: scale(1.1);
 }
 
 .library_pics button:active {
-    background-color: chocolate;
+    background-color: rgb(103, 101, 101);
     transform: scale(0.9);
 }
 
@@ -87,6 +90,7 @@ h2 {
     flex: 1;
     padding: 20px;
     border: 1px solid black;
+    border-radius: 10px;
     margin: 10px;
     flex-direction: column;
     align-items: center;
@@ -94,16 +98,18 @@ h2 {
 
 .books_in_stock img {
     margin: 10px;
-    max-width: 90%;
+    max-width: 50%;
     height: auto;
+    border-radius: 10px;
 }
 
 .books_in_stock button {
-    background-color:peru;
+    background-color:rgb(203, 210, 218);
     font-family: Georgia, 'Times New Roman', Times, serif;
     color: black;
     padding: 10px 20px;
     border: none;
+    border-radius: 10px;
     cursor: pointer;
     margin-bottom: 10px;
     transition: transform 0.3s, background-color 0.3s;
@@ -149,11 +155,11 @@ input {
     }
 }
 .books_in_stock button:hover {
-    background-color: orange;
+    background-color: rgb(180, 179, 177);
     transform: scale(1.1);
 }
 
 .books_in_stock button:active {
-    background-color: chocolate;
+    background-color: rgb(91, 90, 89);
     transform: scale(0.9);
 }
