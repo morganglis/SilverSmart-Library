@@ -4,7 +4,6 @@ from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # i
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-
 @app.route('/seed_db', methods=['POST'])
 def seed_db_route():
     seed_database()
