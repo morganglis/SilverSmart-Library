@@ -84,7 +84,6 @@ def checkout():
             flash('Patron ID has been renewed.', 'success')
             is_expired = False  # Update the expiration status after renewal
 
-
         if is_expired:
             # Pass the is_expired to the template to show the renewal button
             return render_template('library_checkout.html', patron=patron, is_expired=is_expired)
@@ -125,6 +124,20 @@ def checkout():
             else:
                 flash(f'Item {item_id} not found.', 'error')
 
+        elif 'cancel_checkout' in request.form:
+            # Clear the session checkout_items
+            checkout_items = session.get('checkout_items', [])
+            
+            for item_id in checkout_items:
+                item = Item.query.get(item_id)
+                if item:
+                    item.isCheckedOut = False  # Reset the 'isCheckedOut' attribute for checked-out items
+                    db.session.commit()  # Commit the change to the database
+
+            session.pop('checkout_items', None)
+            flash('Checkout canceled successfully.', 'info')
+            return redirect(url_for('checkout'))
+
         # Confirm Checkout
         elif 'confirm_checkout' in request.form:
             checkout_items = session.get('checkout_items', [])
@@ -161,9 +174,10 @@ def checkout():
 
     # For GET requests or any other redirection
     items = {item.itemID: item for item in Item.query.all()}
+    item_id = request.form.get('itemId', None)
     return render_template('library_checkout.html', patron=patron, is_expired=is_expired,
                            checkout_items=session.get('checkout_items', []),
-                           items=items)
+                           items=items, item_id=item_id)
 
 def seed_database():
     # Clears out existing data and then seeds the database with data in this
