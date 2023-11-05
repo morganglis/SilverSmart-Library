@@ -77,7 +77,6 @@ def accessibility():
 def terms_pay():
     return render_template('terms_of_payment.html')
 
-
 @app.route('/checkin')
 def checkin():
     return render_template('library_checkin.html')
