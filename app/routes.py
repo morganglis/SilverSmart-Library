@@ -27,6 +27,10 @@ def database_summary():
                            authors=authors, checkouts=checkouts)
 
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/add_patron')
 def add_patron():
     # Display a form to add a new patron
@@ -141,11 +145,11 @@ def checkout():
             else:
                 flash(f'Item {item_id} not found.', 'error')
 
-        # Confirm Checkout
+                # Confirm Checkout
         elif 'confirm_checkout' in request.form:
             checkout_items = session.get('checkout_items', [])
+            due_dates = []  # Initialize due_dates list
             if checkout_items:
-                due_dates = []
                 # Process each item and create Checkout records
                 for item_id in checkout_items:
                     item = Item.query.get(item_id)
@@ -157,9 +161,6 @@ def checkout():
                 db.session.commit()
                 flash('Items checked out successfully.', 'success')
 
-                # Clear the session checkout_items after successful checkout
-                session.pop('checkout_items', None)
-
                 # Generate receipt data
                 receipt_data = []
                 for item_id, due_date_str in zip(checkout_items, due_dates):
@@ -170,10 +171,14 @@ def checkout():
                             'due_date': due_date_str
                         })
 
+                # Clear the session checkout_items after a successful checkout
+                session.pop('checkout_items', None)
+
                 # Redirect to the receipt page with the necessary data
                 return render_template('receipt.html', patron=patron, receipt_data=receipt_data)
             else:
                 flash('No items to checkout.', 'error')
+                return redirect(url_for('checkout'))
 
     # For GET requests or any other redirection
     items = {item.itemID: item for item in Item.query.all()}
