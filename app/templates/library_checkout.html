@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html>
 {% include 'header.html' %}
 <head>
     <style>
@@ -64,7 +63,6 @@
             background-color: #fff;
             margin-top: 20px;
         }
-
     </style>
 </head>
 
@@ -108,7 +106,14 @@
         <ul>
             {% for item_id in checkout_items %}
                 {% if item_id and item_id|int in items %}
-                    <li style="text-align: center;">{{ items[item_id|int].itemTitle }} with Item ID {{ item_id }} has been added to checkout!</li>
+                    <li style="text-align: center;">
+                        {{ items[item_id|int].itemTitle }} with Item ID {{ item_id }} has been added to checkout!
+                        <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block;">
+                            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+                            <input type="hidden" name="itemIDToRemove" value="{{ item_id }}">
+                            <button type="submit" name="remove_item" style="background-color: red; color: #fff; border: none; border-radius: 5px; padding: 5px;">Remove</button>
+                        </form>
+                    </li>
                 {% else %}
                     <li>Item {{ items[item_id|int].itemId }} not found or does not exist.</li>
                 {% endif %}
@@ -120,6 +125,8 @@
             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
             <button type="submit" name="confirm_checkout" >Confirm Checkout</button>
         </form>
+
+
     {% endif %}
 
     <!-- Display receipt after checkout -->

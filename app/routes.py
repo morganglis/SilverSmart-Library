@@ -78,6 +78,10 @@ def terms_pay():
     return render_template('terms_of_payment.html')
 
 
+@app.route('/checkin')
+def checkin():
+    return render_template('library_checkin.html')
+
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     if 'checkout_items' not in session:
@@ -145,7 +149,22 @@ def checkout():
             else:
                 flash(f'Item {item_id} not found.', 'error')
 
-                # Confirm Checkout
+        if 'remove_item' in request.form:
+            item_id_to_remove = request.form.get('itemIDToRemove')
+            if item_id_to_remove in session.get('checkout_items', []):
+                session['checkout_items'].remove(item_id_to_remove)
+                item = Item.query.get(item_id_to_remove)
+                if item:
+                    item.isCheckedOut = False
+                    patron.itemsRented -= 1
+                    db.session.commit()
+                    flash(f'Item {item_id_to_remove} removed from checkout list.', 'success')
+                else:
+                    flash(f'Item {item_id_to_remove} not found.', 'error')
+            else:
+                flash(f'Item {item_id_to_remove} is not in the checkout list.', 'error')
+
+        # Confirm Checkout
         elif 'confirm_checkout' in request.form:
             checkout_items = session.get('checkout_items', [])
             due_dates = []  # Initialize due_dates list
