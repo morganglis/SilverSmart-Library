@@ -126,6 +126,13 @@
             <button type="submit" name="confirm_checkout" >Confirm Checkout</button>
         </form>
 
+<!-- Clear checkout list-->
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <button type="submit" name="cancel_checkout">Cancel Checkout</button>
+        </form>
+
+
 
     {% endif %}
 
