@@ -38,7 +38,7 @@ class Author(db.Model):
     authorID = db.Column(db.SmallInteger, primary_key=True)
     firstName = db.Column(db.String(20))
     lastName = db.Column(db.String(20))
-class ItemAuthors(db.Model):
-    __tablename__ = 'item_authors'  # Explicit table name declaration
-    authorID = db.Column(db.SmallInteger, db.ForeignKey('author.authorID'), primary_key=True)
-    itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
+# class ItemAuthors(db.Model):
+#     __tablename__ = 'item_authors'  # Explicit table name declaration
+#     authorID = db.Column(db.SmallInteger, db.ForeignKey('author.authorID'), primary_key=True)
+#     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)

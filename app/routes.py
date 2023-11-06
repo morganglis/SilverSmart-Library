@@ -225,7 +225,7 @@ def seed_database():
     # Clears out existing data and then seeds the database with data in this
 
     db.session.query(Checkout).delete()
-    db.session.query(ItemAuthors).delete()
+   # db.session.query(ItemAuthors).delete()
     db.session.query(Author).delete()
     db.session.query(Item).delete()
     db.session.query(ItemType).delete()
@@ -253,11 +253,11 @@ def seed_database():
     ]
 
     # Add ItemAuthors associations
-    item_authors = [
-        ItemAuthors(authorID=1, itemID=1),
-        ItemAuthors(authorID=2, itemID=2),
+    #item_authors = [
+        #ItemAuthors(authorID=1, itemID=1),
+       # ItemAuthors(authorID=2, itemID=2),
 
-    ]
+  #  ]
 
     # Add patrons
     patrons = [
@@ -272,7 +272,7 @@ def seed_database():
     ]
 
     # Add all to session
-    db.session.add_all(authors + item_types + items + patrons + item_authors)
+    db.session.add_all(authors + item_types + items + patrons )
 
     # Commit the session
     db.session.commit()
