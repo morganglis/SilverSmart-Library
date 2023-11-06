@@ -58,6 +58,10 @@ def library():
     # This is how we to the index page.
     return render_template('index.html')
 
+@app.route('/foundation')
+def foundation():
+    return render_template('library_foundation.html')
+
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():

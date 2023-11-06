@@ -2,6 +2,20 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer_styles.css') }}">
+    <style>
+        .social-icons {
+            display: flex;
+            align-items: center;
+        }
+        .social-icons a {
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .social-icons img {
+            height: 100px;
+            width: 100px;
+        }
+    </style>
     <title></title>
 </head>
 <body>
@@ -9,7 +23,18 @@
         <div class="inner_footer">
             <div class="logo">
                 <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library logo">
-                <img src="{{ url_for('static', filename='images/Social_icons.png') }}" alt="Silversmart Socials">
+                <div class="social-icons" style="width: 50px; height: 50px;">
+                    <a href="https://www.facebook.com/your_facebook_page_url">
+                        <img src="{{ url_for('static', filename='images/facebook_icon.png') }}" alt="Facebook" style="width: 50px; height: 50px;">
+                    </a>
+                    <a href="https://www.instagram.com/your_instagram_username/">
+                        <img src="{{ url_for('static', filename='images/instagram_icon.png') }}" alt="Instagram" style="width: 50px; height: 50px;">
+                    </a>
+                    </a>
+                    <a href="https://www.youtube.com/your_instagram_username/">
+                        <img src="{{ url_for('static', filename='images/youtube_icon.png') }}" alt="Instagram" style="width: 50px; height: 50px;">
+                    </a>
+                </div>
             </div>
 
             <div class="footer_third">
@@ -24,7 +49,7 @@
                 <h1>Support Us</h1>
                 <a href="#">Friends of the Library</a>
                 <a href="#">Volunteer</a>
-                <a href="#">Library Foundation</a>
+                <a href="{{ url_for('foundation') }}">Library Foundation</a>
                 <a href="#">Donate</a>
             </div>
         </div>
