@@ -85,7 +85,6 @@ def checkout():
             flash('Patron ID has been renewed.', 'success')
             is_expired = False  # Update the expiration status after renewal
 
-
         if is_expired:
             # Pass the is_expired to the template to show the renewal button
             return render_template('library_checkout.html', patron=patron, is_expired=is_expired)
@@ -166,6 +165,7 @@ def checkout():
                            checkout_items=session.get('checkout_items', []),
                            items=items)
 
+
 def seed_database():
     # Clears out existing data and then seeds the database with data in this
 
@@ -223,4 +223,3 @@ def seed_database():
     db.session.commit()
 
     print("Database seeded successfully!")
-
