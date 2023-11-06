@@ -62,5 +62,9 @@ footer { /* format the whole footer */
     padding-bottom: 5px;
 }
 
+img {
+    border-radius: 10px;
+}
+
 
 

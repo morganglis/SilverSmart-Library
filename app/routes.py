@@ -62,6 +62,25 @@ def library():
 def foundation():
     return render_template('library_foundation.html')
 
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy_policy.html')
+
+@app.route('/terms_use')
+def terms_use():
+    return render_template('terms_of_use.html')
+
+@app.route('/accessibility')
+def accessibility():
+    return render_template('accessibility.html')
+
+@app.route('/terms_pay')
+def terms_pay():
+    return render_template('terms_of_payment.html')
+
+@app.route('/checkin')
+def checkin():
+    return render_template('library_checkin.html')
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():

@@ -2,27 +2,14 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer_styles.css') }}">
-    <style>
-        .social-icons {
-            display: flex;
-            align-items: center;
-        }
-        .social-icons a {
-            text-decoration: none;
-            margin-right: 10px;
-        }
-        .social-icons img {
-            height: 100px;
-            width: 100px;
-        }
-    </style>
     <title></title>
 </head>
 <body>
-    <footer style="background-color: #948E99;">
+    <footer style="background-color: #a9acad;">
         <div class="inner_footer">
             <div class="logo">
                 <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library logo">
+                <img src="{{ url_for('static', filename='images/library_logo_2.png') }}" alt="Silversmart Library logo 2">
                 <div class="social-icons" style="width: 50px; height: 50px;">
                     <a href="https://www.facebook.com/your_facebook_page_url">
                         <img src="{{ url_for('static', filename='images/facebook_icon.png') }}" alt="Facebook" style="width: 50px; height: 50px;">
@@ -39,17 +26,17 @@
 
             <div class="footer_third">
                 <h1>Site Info</h1>
-                <a href="#">Accessibility</a>
-                <a href="#">Privacy Policy</a>
-                <a href="#"> Terms or Payment</a>
-                <a href="#"> Terms of Use</a>
+                <a href="{{ url_for('accessibility') }}">Accessibility</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('terms_pay') }}">Terms of Payment</a>
+                <a href="{{ url_for('terms_use') }}">Terms of Use</a>
             </div>
 
             <div class="footer_third">
                 <h1>Support Us</h1>
                 <a href="#">Friends of the Library</a>
                 <a href="#">Volunteer</a>
-                <a href="{{ url_for('foundation') }}">Library Foundation</a>
+                <a href="#">Library Foundation</a>
                 <a href="#">Donate</a>
             </div>
         </div>

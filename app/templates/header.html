@@ -8,21 +8,15 @@
     <title>SilverSmart Library</title>
     <header>
         <div class="logo">
-            <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo">
-        </div>
-        <div class="drop_down">
-            <button class="drop_button">=</button>
-            <div class="drop_content">
-                <a href="{{ url_for('checkout') }}">Check-Out</a>
-                <a href="#">Check-In</a>
-            </div>
+            <a href="{{ url_for('library') }}"> <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo"></a>
         </div>
         <div class="tool_bar">
             <nav>
                 <ul>
                     <button> <a href="{{ url_for('library') }}">Home</a></button>
-                    <button><a href="#">Contact</a></button>
-                    <button><a href="#">About</a></button>
+                    <button> <a href="{{ url_for('checkout') }}">Check-Out</a></button>
+                    <button> <a href="{{ url_for('checkin') }}">Check-In</a> </button>
+                    <button> <a href="{{ url_for('about') }}">About</a></button>
                 </ul>
             </nav>
         </div>

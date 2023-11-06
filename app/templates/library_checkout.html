@@ -1,7 +1,73 @@
+<!DOCTYPE html>
 {% include 'header.html' %}
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #258cd1;
+        }
+        p {
+            font-weight: bold;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
+        .receipt {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #fff;
+            margin-top: 20px;
+        }
+    </style>
+</head>
 
 <body>
-<h2>Verify Patron</h2>
+
 <form action="{{ url_for('checkout') }}" method="post">
     <label for="patron_id">Enter Patron ID:</label>
     <input type="text" id="patronID" name="patronID" required>
@@ -18,7 +84,7 @@
         </form>
     {% elif patron.acctBalance > 0 %}
         <!-- Balance message and payment form -->
-        <p>You have a balance of ${{ "%.2f"|format(patron.acctBalance) }}. Please pay the balance:</p>
+        <p>You have a balance of ${{ "%.2f"|format(patron.acctBalance) }}. Please pay the balance.</p>
         <form action="{{ url_for('checkout') }}" method="post">
             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
             <input type="number" name="payment" step="0.01" min="0.01" max="{{ patron.acctBalance }}" required>
@@ -36,13 +102,20 @@
 
     <!-- List of items to checkout -->
     {% if checkout_items %}
-        <h3>Items to Checkout:</h3>
+        <p style="text-align: center;">Items to Checkout:</p>
         <ul>
-            {% for itemId in checkout_items %}
-                {% if itemId in items %}
-                    <li>{{ itemId }} - {{ items[itemId].itemTitle }}</li>
+            {% for item_id in checkout_items %}
+                {% if item_id and item_id|int in items %}
+                    <li style="text-align: center;">
+                        {{ items[item_id|int].itemTitle }} with Item ID {{ item_id }} has been added to checkout!
+                        <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block;">
+                            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+                            <input type="hidden" name="itemIDToRemove" value="{{ item_id }}">
+                            <button type="submit" name="remove_item" style="background-color: red; color: #fff; border: none; border-radius: 5px; padding: 5px;">Remove</button>
+                        </form>
+                    </li>
                 {% else %}
-                    <li>Item ID {{ itemId }} not found.</li>
+                    <li>Item {{ items[item_id|int].itemId }} not found or does not exist.</li>
                 {% endif %}
             {% endfor %}
         </ul>
@@ -50,8 +123,17 @@
         <!-- Confirm Checkout -->
         <form action="{{ url_for('checkout') }}" method="post">
             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
-            <button type="submit" name="confirm_checkout">Confirm Checkout</button>
+            <button type="submit" name="confirm_checkout" >Confirm Checkout</button>
         </form>
+
+<!-- Clear checkout list-->
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <button type="submit" name="cancel_checkout">Cancel Checkout</button>
+        </form>
+
+
+
     {% endif %}
 
     <!-- Display receipt after checkout -->
@@ -77,8 +159,9 @@
     </form>
 {% endif %}
 
-{% for message in get_flashed_messages() %}
-    <div class="flash-message">{{ message }}</div>
+{% for message in get_flashed_messages() %}<b>
+    <div class="flash-message" style="text-align: center;">{{ message }}</div>
+    </b>
 {% endfor %}
 
 <!-- Button to navigate to add a new patron -->
@@ -86,8 +169,6 @@
     <button type="submit">Add New Patron</button>
 </form>
 
-
 </body>
 
 {% include 'footer.html' %}
-
