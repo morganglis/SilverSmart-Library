@@ -36,10 +36,6 @@ def add_patron():
     # Display a form to add a new patron
     return render_template('add_patron.html')
 
-@app.route('/about', methods=['POST'])
-def about():
-    return render_template('about.html')
-
 @app.route('/create_patron', methods=['POST'])
 def create_patron():
     # Get data from form submission to create a new Patron
