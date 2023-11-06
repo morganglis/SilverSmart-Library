@@ -28,7 +28,7 @@ class Item(db.Model):
     typeID = db.Column(db.SmallInteger, db.ForeignKey('item_type.typeID'))
     isCheckedOut = db.Column(db.Boolean, default=False, nullable=False)  # Added attribute for item availability
     checkouts = db.relationship('Checkout', backref='item', lazy='dynamic')
-    authors = db.relationship('Author', secondary='item_authors', backref=db.backref('items', lazy='dynamic'))
+    #authors = db.relationship('Author', secondary='item_authors', backref=db.backref('items', lazy='dynamic'))
 class Checkout(db.Model):
     checkoutID = db.Column(db.Integer, primary_key=True,autoincrement = True) # this is unique for primary key
     patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID')) # this does not need to be primary key
