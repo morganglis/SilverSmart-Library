@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
-from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # import the tables you need to access
+from app.model import Patron, ItemType, Item, Checkout, Author  # import the tables you need to access
 from datetime import datetime, timedelta
 from decimal import Decimal
 
