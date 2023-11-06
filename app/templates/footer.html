@@ -14,10 +14,10 @@
 
             <div class="footer_third">
                 <h1>Site Info</h1>
-                <a href="#">Accessibility</a>
-                <a href="#">Privacy Policy</a>
-                <a href="#"> Terms or Payment</a>
-                <a href="#"> Terms of Use</a>
+                <a href="{{ url_for('accessibility') }}">Accessibility</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('terms_pay') }}">Terms of Payment</a>
+                <a href="{{ url_for('terms_use') }}">Terms of Use</a>
             </div>
 
             <div class="footer_third">
