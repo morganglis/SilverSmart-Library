@@ -1,11 +1,14 @@
-html {
-    height: 100%;
+*{ /* Baseline format for the header */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #282c34;
-    color: #ffffff;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #ebeff5;
+    color: #000000;
     margin: 0;
     min-height: 100%;
 
@@ -20,55 +23,121 @@ body {
 
 
 .container {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #ebeff5;
     text-align: center;
-    position: relative;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
+    /* background-image: url('library_pic_background.jpg');
+    background-size: cover;
+    background-repeat: repeat-y;
+    background-attachment: fixed; */
 }
 
-h1 {
+main {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
 
-    font-size: 3em;
-    text-align: left;
-    z-index: 2;
+.library_pics {
+    flex: 1;
+    display: flex;
+    padding: 20px;
+    border: 1px solid black;
+    margin: 10px;
+    border-radius: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.library_pics img {
+    margin: 10px;
+    max-width: 50%;
+    height: auto;
 }
 
 h2 {
     font-size: 2.5em;
-    text-align: left;
+    text-align: center;
     z-index: 2;
+    margin-bottom: 100px;
+    margin-top: 100px;
+
+}
+.library_pics button {
+    background-color: rgb(203, 210, 218);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: transform 0.3s, background-color 0.3s;
 }
 
-h3 {
-    font-size: 2em;
-    z-index: 2;
-    position: relative;
+.library_pics button:hover {
+    background-color: rgb(203, 210, 218);
+    transform: scale(1.1);
+}
+
+.library_pics button:active {
+    background-color: rgb(103, 101, 101);
+    transform: scale(0.9);
+}
+
+.books_in_stock {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.books_in_stock img {
+    margin: 10px;
+    max-width: 50%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.books_in_stock button {
+    background-color:rgb(203, 210, 218);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+button {
+    margin-right: 20px;
+    background-color: rgb(203, 210, 218);
+    color: black;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+input {
+    margin-right: 20px;
+    background-color: rgb(203, 210, 218);
+    color: black;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.3s, background-color 0.3s;
     margin-bottom: 20px;
-}
-
-/* Table styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    color: #000;
-    background-color: #fff;
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-th {
-    background-color: teal;
-    color: white;
-}
-
-tr:hover {
-    background-color: lightgray;
 }
 
 /* Responsive adjustments */
@@ -84,4 +153,17 @@ tr:hover {
     table, th, td {
         font-size: 0.8em;
     }
+}
+.books_in_stock button:hover {
+    background-color: rgb(180, 179, 177);
+    transform: scale(1.1);
+}
+
+.books_in_stock button:active {
+    background-color: rgb(91, 90, 89);
+    transform: scale(0.9);
+}
+
+.button-container {
+    display: flex;
 }

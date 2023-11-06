@@ -4,7 +4,6 @@ from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # i
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-
 @app.route('/seed_db', methods=['POST'])
 def seed_db_route():
     seed_database()
@@ -27,6 +26,10 @@ def database_summary():
     return render_template('database_summary.html', patrons=patrons, item_types=item_types, items=items,
                            authors=authors, checkouts=checkouts)
 
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/add_patron')
 def add_patron():
@@ -58,6 +61,25 @@ def library():
     # This is how we to the index page.
     return render_template('index.html')
 
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy_policy.html')
+
+@app.route('/terms_use')
+def terms_use():
+    return render_template('terms_of_use.html')
+
+@app.route('/accessibility')
+def accessibility():
+    return render_template('accessibility.html')
+
+@app.route('/terms_pay')
+def terms_pay():
+    return render_template('terms_of_payment.html')
+
+@app.route('/checkin')
+def checkin():
+    return render_template('library_checkin.html')
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -125,11 +147,42 @@ def checkout():
             else:
                 flash(f'Item {item_id} not found.', 'error')
 
+
+        if 'remove_item' in request.form:
+            item_id_to_remove = request.form.get('itemIDToRemove')
+            if item_id_to_remove in session.get('checkout_items', []):
+                session['checkout_items'].remove(item_id_to_remove)
+                item = Item.query.get(item_id_to_remove)
+                if item:
+                    item.isCheckedOut = False
+                    patron.itemsRented -= 1
+                    db.session.commit()
+                    flash(f'Item {item_id_to_remove} removed from checkout list.', 'success')
+                else:
+                    flash(f'Item {item_id_to_remove} not found.', 'error')
+            else:
+                flash(f'Item {item_id_to_remove} is not in the checkout list.', 'error')
+
+        if 'cancel_checkout' in request.form:
+            # Clear the session checkout_items
+            checkout_items = session.get('checkout_items', [])
+
+            for item_id in checkout_items:
+                item = Item.query.get(item_id)
+                if item:
+                    item.isCheckedOut = False  # Reset the 'isCheckedOut' attribute for checked-out items
+                    db.session.commit()  # Commit the change to the database
+
+            session.pop('checkout_items', None)
+            flash('Checkout canceled successfully.', 'info')
+            return redirect(url_for('checkout'))
+
+
         # Confirm Checkout
         elif 'confirm_checkout' in request.form:
             checkout_items = session.get('checkout_items', [])
+            due_dates = []  # Initialize due_dates list
             if checkout_items:
-                due_dates = []
                 # Process each item and create Checkout records
                 for item_id in checkout_items:
                     item = Item.query.get(item_id)
@@ -141,9 +194,6 @@ def checkout():
                 db.session.commit()
                 flash('Items checked out successfully.', 'success')
 
-                # Clear the session checkout_items after successful checkout
-                session.pop('checkout_items', None)
-
                 # Generate receipt data
                 receipt_data = []
                 for item_id, due_date_str in zip(checkout_items, due_dates):
@@ -154,16 +204,21 @@ def checkout():
                             'due_date': due_date_str
                         })
 
+                # Clear the session checkout_items after a successful checkout
+                session.pop('checkout_items', None)
+
                 # Redirect to the receipt page with the necessary data
                 return render_template('receipt.html', patron=patron, receipt_data=receipt_data)
             else:
                 flash('No items to checkout.', 'error')
+                return redirect(url_for('checkout'))
 
     # For GET requests or any other redirection
     items = {item.itemID: item for item in Item.query.all()}
+    item_id = request.form.get('itemId', None)
     return render_template('library_checkout.html', patron=patron, is_expired=is_expired,
                            checkout_items=session.get('checkout_items', []),
-                           items=items)
+                           items=items, item_id=item_id)
 
 
 def seed_database():

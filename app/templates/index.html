@@ -3,9 +3,7 @@
 <body>
     <div class="main-content">
         <div class="container">
-
-            <h1>Hello World!</h1>
-            <h2>Future Home Of Silversmart Library!</h2>
+            <h2>Welcome to the SilverSmart Library System!</h2>
 
             <form action="{{ url_for('seed_db_route') }}" method="post">
                 <input type="submit" value="Seed Database" />
@@ -23,7 +21,17 @@
               {% endif %}
             {% endwith %}
 
-                    </div>
+            <div class="library_pics">
+              <button href="#">Library Photos</button>
+              <img src="{{ url_for('static',filename='images/silversmart_inside.png') }}" alt="Library Pitures">
+          </div>
+  
+          <div class="books_in_stock">
+              <button href="#">Book Selection</button>
+              <img src="{{ url_for('static',filename='images/books_in_stock.png') }}" alt="Books in Stock">
+          </div>
+
+          </div>
     </div>
 </body>
 

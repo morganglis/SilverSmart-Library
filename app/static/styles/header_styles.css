@@ -29,7 +29,7 @@ header {
     color: wheat;
     padding: 10px;
     border: none;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 .drop_down {
@@ -64,27 +64,33 @@ header {
 .tool_bar ul {
     list-style: none;
     display: flex;
+    color: black;
 }
 
 .tool_bar button {
     margin-right: 20px;
-    background-color: peru;
+    background-color: rgb(203, 210, 218);
     color: black;
     padding: 9px 10px;
     border: none;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 16px;
     transition: transform 0.3s, background-color 0.3s;
 }
 
 .tool_bar button:hover {
-    background-color: orange;
+    background-color: rgb(71, 74, 74);
     transform: scale(1.1);
 }
 
 .tool_bar button:active {
-    background-color: chocolate;
+    background-color: rgb(96, 99, 101);
     transform: scale(0.9);
+}
+
+a {
+    color: rgb(0, 0, 0); /* Change the color to your desired value */
 }
 
 
