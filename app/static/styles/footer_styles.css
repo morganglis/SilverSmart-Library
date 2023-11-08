@@ -1,0 +1,70 @@
+*{ /* baseline format for footer */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
+}
+
+footer { /* format the whole footer */
+    width: 100vw;
+    display: block;
+    overflow: hidden;
+    padding: 10px 0;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: #fff;
+}
+
+.inner_footer { /* format the inner footer */
+    display: block;
+    margin: 0 auto;
+    width: 1100px;
+    height: 100%;
+}
+
+.inner_footer .logo { /* format image placement */
+    width: 15%;
+    float: left;
+    height: 100%;
+    display: block;
+
+}
+
+.inner_footer .logo img{ /* edit image size */
+    width: 200px;
+    height: auto;
+
+}
+
+.inner_footer .footer_third {
+    width: 30%;
+    margin-right: 10px;
+    float: right;
+    height: 100%;
+}
+
+.inner_footer .footer_third h1 { /*Customization for the "support us, Site info*/
+    font-size: 35px;
+    font-family: serif;
+    color: black;
+    display: block;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.inner_footer .footer_third a { /*Customization for the links*/
+    font-size: 15px;
+    color: black;
+    display: block;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 20px;
+    padding-bottom: 5px;
+}
+
+img {
+    border-radius: 10px;
+}
+
+
+

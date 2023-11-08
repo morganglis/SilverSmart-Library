@@ -1,32 +1,174 @@
 <!DOCTYPE html>
-<html>
+{% include 'header.html' %}
 <head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: rgb(203, 210, 218);
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: rgb(71, 74, 74);
+        }
+        p {
+            font-weight: bold;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
+        .receipt {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #fff;
+            margin-top: 20px;
+        }
+    </style>
 </head>
+
 <body>
-    {% include 'header.html' %}
-    <main>
-        <div class="main-content">
-            <div class="container">
-                <h1>Checkout</h1>
-                <div class="action-buttons">
-                    <form id="student-id-form">
-                        <label for="student-id">Enter Student ID:</label>
-                        <input type="text" id="student-id" name="student-id" placeholder="Student ID">
-                        <button type="button" id="confirm-button">Confirm</button>
-                    </form>
-                </div>
-                <div id="confirmation-messages">
-                    <!-- Messages related to confirmation can be displayed here -->
-                </div>
-                <div>
-                    <p>Current DateTime: <span id="current-time"></span></p>
-                    <p>Due Date: <span id="due-back"></span></p>
-                </div>
-            </div>
+
+<form action="{{ url_for('checkout') }}" method="post">
+    <label for="patron_id">Enter Patron ID:</label>
+    <input type="text" id="patronID" name="patronID" required>
+    <button type="submit">Verify Patron</button>
+</form>
+
+{% if patron %}
+    {% if is_expired %}
+        <!-- Renewal message and button -->
+        <p>Your ID has expired. Would you like to renew it?</p>
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <button type="submit" name="renew">Renew ID</button>
+        </form>
+    {% elif patron.acctBalance > 0 %}
+        <!-- Balance message and payment form -->
+        <p>You have a balance of ${{ "%.2f"|format(patron.acctBalance) }}. Please pay the balance.</p>
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <input type="number" name="payment" step="0.01" min="0.01" max="{{ patron.acctBalance }}" required>
+            <button type="submit">Make Payment</button>
+        </form>
+    {% else %}
+        <!-- Add item to checkout list -->
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <label for="itemId">Enter Item ID:</label>
+            <input type="text" id="itemId" name="itemId" required>
+            <button type="submit" name="add_item">Add Item</button>
+        </form>
+    {% endif %}
+
+    <!-- List of items to checkout -->
+    {% if checkout_items %}
+        <p style="text-align: center;">Items to Checkout:</p>
+        <ul>
+            {% for item_id in checkout_items %}
+                {% if item_id and item_id|int in items %}
+                    <li style="text-align: center;">
+                        {{ items[item_id|int].itemTitle }} with Item ID {{ item_id }} has been added to checkout!
+                        <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block;">
+                            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+                            <input type="hidden" name="itemIDToRemove" value="{{ item_id }}">
+                            <button type="submit" name="remove_item" style="background-color: red; color: #fff; border: none; border-radius: 5px; padding: 5px;">Remove</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li>Item {{ items[item_id|int].itemId }} not found or does not exist.</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+        <!-- Confirm Checkout -->
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <button type="submit" name="confirm_checkout" >Confirm Checkout</button>
+        </form>
+
+<!-- Clear checkout list-->
+        <form action="{{ url_for('checkout') }}" method="post">
+            <input type="hidden" name="patronID" value="{{ patron.patronID }}">
+            <button type="submit" name="cancel_checkout">Cancel Checkout</button>
+        </form>
+
+
+
+    {% endif %}
+
+    <!-- Display receipt after checkout -->
+    {% if receipt_data %}
+        <div class="receipt">
+            <h3>Receipt</h3>
+            <p>Patron: {{ patron.firstName }} {{ patron.lastName }}</p>
+            <p>Items Checked Out:</p>
+            <ul>
+                {% for item in receipt_data %}
+                    <li>{{ item.item_title }} - Due: {{ item.due_date }}</li>
+                {% endfor %}
+            </ul>
         </div>
-    </main>
+        <!-- Print Button -->
+        <button onclick="window.print()">Print Receipt</button>
+    {% endif %}
+{% elif add_patron %}
+    <!-- Form to add a new patron, include form fields as needed -->
+    <form action="{{ url_for('add_patron') }}" method="post">
+        <!-- Include your input fields for adding a patron here -->
+        <button type="submit">Add New Patron</button>
+    </form>
+{% endif %}
 
-    {% include 'footer.html' %}
+{% for message in get_flashed_messages() %}<b>
+    <div class="flash-message" style="text-align: center;">{{ message }}</div>
+    </b>
+{% endfor %}
+
+<!-- Button to navigate to add a new patron -->
+<form action="{{ url_for('add_patron') }}" method="get">
+    <button type="submit">Add New Patron</button>
+</form>
+
 </body>
-</html>
 
+{% include 'footer.html' %}

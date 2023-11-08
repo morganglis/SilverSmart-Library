@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-</head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <title>SilverSmart Library</title>
     <header>
-        <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo" class="logo" style="width: 15%; height: auto; left: 100px;">
+        <div class="logo">
+            <a href="{{ url_for('library') }}"> <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo"></a>
+        </div>
+        <div class="tool_bar">
+            <nav>
+                <ul>
+                    <button> <a href="{{ url_for('library') }}">Home</a></button>
+                    <button> <a href="{{ url_for('checkout') }}">Check-Out</a></button>
+                    <button> <a href="{{ url_for('checkin') }}">Check-In</a> </button>
+                    <button> <a href="{{ url_for('about') }}">About</a></button>
+                </ul>
+            </nav>
+        </div>
     </header>
-</body>
-</html>
+</head>
