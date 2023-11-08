@@ -69,6 +69,10 @@ def privacy():
 def terms_use():
     return render_template('terms_of_use.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/accessibility')
 def accessibility():
     return render_template('accessibility.html')
