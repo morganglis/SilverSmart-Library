@@ -119,7 +119,7 @@ def checkin():
 
             # Remove the checked-in item from the database
 
-            # db.session.delete(checkout)
+            db.session.delete(checkout)
             db.session.commit()
         else:
             print("Checkout record not found.")
