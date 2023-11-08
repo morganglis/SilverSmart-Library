@@ -29,16 +29,29 @@ class Item(db.Model):
     isCheckedOut = db.Column(db.Boolean, default=False, nullable=False)  # Added attribute for item availability
     checkouts = db.relationship('Checkout', backref='item', lazy='dynamic')
     authors = db.relationship('Author', secondary='item_authors', backref=db.backref('items', lazy='dynamic'))
+
 class Checkout(db.Model):
     checkoutID = db.Column(db.Integer, primary_key=True,autoincrement = True) # this is unique for primary key
     patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID')) # this does not need to be primary key
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID')) # this does not need to be primary key
     dueDate = db.Column(db.Date)# this needs to be due date because you can return late.
+
 class Author(db.Model):
     authorID = db.Column(db.SmallInteger, primary_key=True)
     firstName = db.Column(db.String(20))
     lastName = db.Column(db.String(20))
+
 class ItemAuthors(db.Model):
     __tablename__ = 'item_authors'  # Explicit table name declaration
     authorID = db.Column(db.SmallInteger, db.ForeignKey('author.authorID'), primary_key=True)
+    itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
+
+class Branch(db.Model):
+    branchID = db.Column(db.SmallInteger, primary_key=True)
+    name = db.Column(db.String(50))
+    address = db.Column(db.String(255))
+    item_branches = db.relationship('ItemBranch', backref='branch', lazy='dynamic')
+
+class ItemBranch(db.Model):
+    branchID = db.Column(db.SmallInteger, db.ForeignKey('branch.branchID'), primary_key=True)
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
