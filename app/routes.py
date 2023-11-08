@@ -1,75 +1,368 @@
-from flask import render_template,request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
-from app.model import Student, Book, checkouts
-from datetime import datetime
+from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # import the tables you need to access
+from datetime import datetime, timedelta
+from decimal import Decimal
 
+@app.route('/seed_db', methods=['POST'])
+def seed_db_route():
+    seed_database()
+    # Flash a success message
+    flash('Database seeded successfully!', 'success')
+    # Redirect to the 'library' route after seeding the database
+    return redirect(url_for('library'))
+
+@app.route('/about')
+def route():
+    return render_template('about.html')
+
+
+@app.route('/database-summary')
+# This is just a quick query to show the contents of the database and display it.
+# This is not part of the project. Just to help with debugging.
+def database_summary():
+    patrons = Patron.query.all()
+    item_types = ItemType.query.all()
+    items = Item.query.all()
+    authors = Author.query.all()
+    checkouts = Checkout.query.all()
+
+    return render_template('database_summary.html', patrons=patrons, item_types=item_types, items=items,
+                           authors=authors, checkouts=checkouts)
+
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/add_patron')
+def add_patron():
+    # Display a form to add a new patron
+    return render_template('add_patron.html')
+
+
+@app.route('/create_patron', methods=['POST'])
+def create_patron():
+    # Get data from form submission to create a new Patron
+    patronID = request.form['patronID']
+    firstName = request.form['firstName']
+    lastName = request.form['lastName']
+    email = request.form['email']
+    phoneNum = request.form['phoneNum']
+    # Create a new Patron instance
+    new_patron = Patron(patronID=patronID, firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
+                        acctBalance=0.00,
+                        itemsRented=0)
+    db.session.add(new_patron)
+    db.session.commit()
+
+    flash('New patron added successfully!')
+    return redirect(url_for('checkout'))
 
 
 @app.route('/')
 def library():
-    # Fetch all students, books, and checkouts
-    students = Student.query.all()
-    books = Book.query.all()
-    checkouts_data = db.session.query(checkouts).all()
+    # This is how we to the index page.
+    return render_template('index.html')
 
-    return render_template('index.html', students=students, books=books, checkouts=checkouts_data)
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy_policy.html')
 
+@app.route('/terms_use')
+def terms_use():
+    return render_template('terms_of_use.html')
 
+@app.route('/accessibility')
+def accessibility():
+    return render_template('accessibility.html')
 
-@app.route('/checkout')
+@app.route('/terms_pay')
+def terms_pay():
+    return render_template('terms_of_payment.html')
+
+@app.route('/checkin')
+def checkin():
+    return render_template('library_checkin.html')
+
+@app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
-    return render_template('library_checkout.html')
+    if 'checkout_items' not in session:
+        session['checkout_items'] = []
 
-@app.route('/add_student', methods=['POST'])
-def add_student():
-    # Get the form data
-    student_id = request.form.get('student_id')
-    name = request.form.get('name')
-    email = request.form.get('email')
+    patron = None
+    is_expired = False
 
-    # Check if the ID already exists
-    existing_student = Student.query.get(student_id)
-    if existing_student:
-        flash('A student with this ID already exists. Please enter a different ID.', 'error')
-        return redirect(url_for('library'))
+    if request.method == 'POST':
+        patron_id = request.form.get('patronID')
+        patron = Patron.query.get(patron_id)
 
-    # Create a new student with the specified ID
-    new_student = Student(id=student_id, name=name, email=email)
+        if not patron:
+            flash('No patron found with this ID.', 'error')
+            return redirect(url_for('checkout'))
 
-    # Add the new student to the session and commit to the database
-    try:
-        db.session.add(new_student)
-        db.session.commit()
-        # Redirect to the home page after successful addition
-        return redirect(url_for('library'))
-    except Exception as e:
-        # Rollback the session in case of an error and show the error message
-        db.session.rollback()
-        flash(f"An error occurred: {e}", 'error')
-        return redirect(url_for('library'))
+        # Calculate if the patron's ID is expired
+        is_expired = datetime.utcnow() > (patron.date_created + timedelta(days=2 * 365))
+
+        # Renew Patron ID
+        if 'renew' in request.form:
+            patron.date_created = datetime.utcnow()
+            db.session.commit()
+            flash('Patron ID has been renewed.', 'success')
+            is_expired = False  # Update the expiration status after renewal
+
+        if is_expired:
+            # Pass the is_expired to the template to show the renewal button
+            return render_template('library_checkout.html', patron=patron, is_expired=is_expired)
+
+        # Check if the patron has already checked out the maximum number of items
+        if patron.itemsRented >= 20:
+            flash('You have reached the maximum number of items allowed to be checked out.', 'error')
+            return redirect(url_for('checkout'))
+
+        # Handle Payment
+        elif 'payment' in request.form:
+            payment_amount = request.form['payment']
+            try:
+                payment = Decimal(payment_amount)
+                if payment > 0 and payment <= patron.acctBalance:
+                    patron.acctBalance -= payment
+                    db.session.commit()
+                    flash(f'Payment of ${payment:.2f} received. New balance: ${patron.acctBalance:.2f}', 'success')
+                else:
+                    flash('Invalid payment amount.', 'error')
+            except ValueError:
+                flash('Invalid payment amount entered.', 'error')
+
+        # Add Item to Checkout List
+        elif 'add_item' in request.form:
+            item_id = request.form.get('itemId')
+            item = Item.query.get(item_id)
+            if item and not item.isCheckedOut and patron.itemsRented < 20:
+                session['checkout_items'].append(item_id)
+                item.isCheckedOut = True  # Mark the item as checked out
+                patron.itemsRented += 1  # Increment the number of items rented by the patron
+                db.session.commit()  # Commit the change to the database
+                flash(f'Item {item_id} added to checkout list.', 'success')
+            elif item and item.isCheckedOut:
+                flash(f'Item {item_id} is already checked out.', 'error')
+            elif patron.itemsRented >= 20:
+                flash('You cannot check out more than 20 items.', 'error')
+            else:
+                flash(f'Item {item_id} not found.', 'error')
 
 
-@app.route('/seed_checkouts')
-def seed_checkouts():
-    # Fetch students and books from the database
-    student1 = Student.query.get(1000)  # Assuming the ID of the first student is 1
-    student2 = Student.query.get(1001)  # Assuming the ID of the second student is 2
-    book1 = Book.query.get(125)  # Assuming the ID of the first book is 1
-    book2 = Book.query.get(620)  # Assuming the ID of the second book is 2
+        if 'remove_item' in request.form:
+            item_id_to_remove = request.form.get('itemIDToRemove')
+            if item_id_to_remove in session.get('checkout_items', []):
+                session['checkout_items'].remove(item_id_to_remove)
+                item = Item.query.get(item_id_to_remove)
+                if item:
+                    item.isCheckedOut = False
+                    patron.itemsRented -= 1
+                    db.session.commit()
+                    flash(f'Item {item_id_to_remove} removed from checkout list.', 'success')
+                else:
+                    flash(f'Item {item_id_to_remove} not found.', 'error')
+            else:
+                flash(f'Item {item_id_to_remove} is not in the checkout list.', 'error')
 
-    # Check if the entities exist
-    if not (student1 and student2 and book1 and book2):
-        return "Error: Some entities do not exist", 400
+        if 'cancel_checkout' in request.form:
+            # Clear the session checkout_items
+            checkout_items = session.get('checkout_items', [])
+
+            for item_id in checkout_items:
+                item = Item.query.get(item_id)
+                if item:
+                    item.isCheckedOut = False  # Reset the 'isCheckedOut' attribute for checked-out items
+                    db.session.commit()  # Commit the change to the database
+
+            session.pop('checkout_items', None)
+            flash('Checkout canceled successfully.', 'info')
+            return redirect(url_for('checkout'))
 
 
-    if book1 not in student1.books:
-        student1.books.append(book1)
-    if book2 not in student2.books:
-        student2.books.append(book2)
+        # Confirm Checkout
+        elif 'confirm_checkout' in request.form:
+            checkout_items = session.get('checkout_items', [])
+            due_dates = []  # Initialize due_dates list
+            if checkout_items:
+                # Process each item and create Checkout records
+                for item_id in checkout_items:
+                    item = Item.query.get(item_id)
+                    if item:
+                        due_date = datetime.utcnow() + timedelta(days=item.item_type.rentDuration)
+                        new_checkout = Checkout(patronID=patron.patronID, itemID=item.itemID, dueDate=due_date)
+                        db.session.add(new_checkout)
+                        due_dates.append(due_date.strftime('%Y-%m-%d'))
+                db.session.commit()
+                flash('Items checked out successfully.', 'success')
 
-    # Commit the changes to the database
-    try:
-        db.session.commit()
-        return "Checkouts successfully added", 200
-    except Exception as e:
-        return f"An error occurred: {e}", 500
+                # Generate receipt data
+                receipt_data = []
+                for item_id, due_date_str in zip(checkout_items, due_dates):
+                    item = Item.query.get(item_id)
+                    if item:
+                        receipt_data.append({
+                            'item_title': item.itemTitle,
+                            'due_date': due_date_str
+                        })
+
+                # Clear the session checkout_items after a successful checkout
+                session.pop('checkout_items', None)
+
+                # Redirect to the receipt page with the necessary data
+                return render_template('receipt.html', patron=patron, receipt_data=receipt_data)
+            else:
+                flash('No items to checkout.', 'error')
+                return redirect(url_for('checkout'))
+
+    # For GET requests or any other redirection
+    items = {item.itemID: item for item in Item.query.all()}
+    item_id = request.form.get('itemId', None)
+    return render_template('library_checkout.html', patron=patron, is_expired=is_expired,
+                           checkout_items=session.get('checkout_items', []),
+                           items=items, item_id=item_id)
+
+def seed_database():
+    # Clears out existing data and then seeds the database with data in this
+
+    db.session.query(Checkout).delete()
+    db.session.query(ItemAuthors).delete()
+    db.session.query(Author).delete()
+    db.session.query(Item).delete()
+    db.session.query(ItemType).delete()
+    db.session.query(Patron).delete()
+
+    # Add authors
+    authors = [
+        Author(authorID=1, firstName='F. Scott', lastName='Fitzgerald'),
+        Author(authorID=2, firstName='George', lastName='Orwell'),
+        Author(authorID=3, firstName='Mary', lastName='Shelley'),
+        Author(authorID=4, firstName='Bram', lastName='Stoker'),
+        Author(authorID=5, firstName='H.P.', lastName='Lovecraft'),
+        Author(authorID=6, firstName='Stephen', lastName='King'),
+        Author(authorID=7, firstName='Jeff', lastName='Hams'),
+        Author(authorID=8, firstName='J.K.', lastName='Rowling'),
+        Author(authorID=9, firstName='J.R.R.', lastName='Tolkien'),
+        Author(authorID=10, firstName='J.D.', lastName='Salinger'),
+        Author(authorID=11, firstName='Mark', lastName='Twain'),
+        Author(authorID=12, firstName='William', lastName='Shakespeare'),
+        Author(authorID=13, firstName='Charles', lastName='Dickens'),
+        Author(authorID=14, firstName='Jules', lastName='Verne'),
+        Author(authorID=15, firstName='Agatha', lastName='Christie'),
+        Author(authorID=16, firstName='Herman', lastName='Melville'),
+        Author(authorID=17, firstName='Harper', lastName='Lee'),
+        Author(authorID=18, firstName='Arthur', lastName='Miller'),
+        Author(authorID=19, firstName='Joseph', lastName='Heller'),
+        Author(authorID=20, firstName='John', lastName='Steinbeck'),
+        Author(authorID=21, firstName='Kurt', lastName='Vonnegut'),
+        Author(authorID=22, firstName='Ray', lastName='Bradbury'),
+        Author(authorID=23, firstName='Ernest', lastName='Hemingway'),
+        Author(authorID=24, firstName='George', lastName='Orwell'),
+        Author(authorID=25, firstName='Virginia', lastName='Woolf'),
+        Author(authorID=26, firstName='John', lastName='Milton'),
+        Author(authorID=27, firstName='James', lastName='Joyce'),
+        Author(authorID=28, firstName='H.G.', lastName='Wells'),
+        Author(authorID=29, firstName='Leo', lastName='Tolstoy'),
+        Author(authorID=30, firstName='Charlotte', lastName='Bronte'),
+        Author(authorID=31, firstName='Emily', lastName='Bronte'),
+
+    ]
+
+    # Add item types
+    item_types = [
+        ItemType(typeID=1, typeName='Book', rentDuration=14),
+        ItemType(typeID=2, typeName='DVD', rentDuration=7),
+        ItemType(typeID=4, typeName='Magazine', rentDuration=7),
+        ItemType(typeID=5, typeName='Audiobook', rentDuration=14),
+        ItemType(typeID=6, typeName='eBook', rentDuration=14),
+
+    ]
+
+    # Add items
+    items = [
+        Item(itemID=1, itemTitle='The Great Gatsby', publishDate=datetime(1925, 4, 10), itemBranch='Main', typeID=1),
+        Item(itemID=2, itemTitle='1984', publishDate=datetime(1949, 6, 8), itemBranch='Downtown', typeID=1),
+        Item(itemID=3, itemTitle='Frankenstein', publishDate=datetime(1945, 8, 17), itemBranch='Main', typeID=1),
+        Item(itemID=4, itemTitle='Dracula', publishDate=datetime(1897, 5, 26), itemBranch='Downtown', typeID=1),
+        Item(itemID=5, itemTitle='Call of Cthulhu', publishDate=datetime(1928, 5, 1), itemBranch='Main', typeID=1),
+        Item(itemID=6, itemTitle='IT', publishDate=datetime(1986, 9, 15), itemBranch='Downtown', typeID=1),
+        Item(itemID=7, itemTitle='Ham and Eggs A SCRUM Love Story', publishDate=datetime(2020, 9, 1), itemBranch='Main', typeID=1),
+        Item(itemID=8, itemTitle='Harry Potter and the Sorcerer\'s Stone', publishDate=datetime(1997, 6, 26), itemBranch='Downtown', typeID=1),
+        Item(itemID=9, itemTitle='The Hobbit', publishDate=datetime(1937, 9, 21), itemBranch='Main', typeID=1),
+        Item(itemID=10, itemTitle='The Catcher in the Rye', publishDate=datetime(1951, 7, 16), itemBranch='Downtown', typeID=1),
+        Item(itemID=11, itemTitle='The Adventures of Tom Sawyer', publishDate=datetime(1876, 12, 1), itemBranch='Main', typeID=1),
+        Item(itemID=12, itemTitle='Romeo and Juliet', publishDate=datetime(1597, 1, 1), itemBranch='Downtown', typeID=1),
+        Item(itemID=13, itemTitle='A Tale of Two Cities', publishDate=datetime(1859, 4, 30), itemBranch='Main', typeID=1),
+        Item(itemID=14, itemTitle='Twenty Thousand Leagues Under the Sea', publishDate=datetime(1870, 1, 1), itemBranch='Downtown', typeID=1),
+        Item(itemID=15, itemTitle='Murder on the Orient Express', publishDate=datetime(1934, 2, 28), itemBranch='Main', typeID=1),
+    ]
+
+    # Add ItemAuthors associations
+    item_authors = [
+        ItemAuthors(authorID=1, itemID=1),
+        ItemAuthors(authorID=2, itemID=2),
+
+    ]
+
+    # Add patrons
+    patrons = [
+        Patron(patronID=1, firstName='John', lastName='Doe', email='john.doe@example.com', phoneNum='1234567890',
+               acctBalance=15.75, itemsRented=2, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=2, firstName='Jane', lastName='Smith', email='jane.smith@example.com', phoneNum='0987654321',
+               acctBalance=0.00, itemsRented=5, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=3, firstName='Jim', lastName='Johns', email='jim.johns@aol.com', phoneNum='9192012654',
+               acctBalance=0.00, itemsRented=5, date_created=datetime(2020, 10, 1)),
+        Patron(patronID=4, firstName='Don', lastName='Johnson', email='d.johnson@yahoo.com', phoneNum='9192022654',
+               acctBalance=0.00, itemsRented=21, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=5, firstName='Bob', lastName='Jones', email='bob.jones@hotmail.com', phoneNum='9192032654',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=6, firstName='Sally', lastName='Williams', email='sally.williams@outlook.com', phoneNum='6192032654',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=7, firstName='Mary', lastName='Brown', email='mary.brown@live.com', phoneNum='2052032654',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=8, firstName='Sue', lastName='Davis', email='sue.davis@gmail.com', phoneNum='8002032654',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=9, firstName='Mike', lastName='Miller', email='mike.miller@netscape.net', phoneNum='6570583230',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=10, firstName='Bill', lastName='Wilson', email='bill.wilson@icnet.net', phoneNum='0857651273',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=11, firstName='Tom', lastName='Moore', email='tom.more@icloud.com', phoneNum='9865390253',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=12, firstName='Tim', lastName='Taylor', email='tim.taylor@mac.com', phoneNum='1237534087',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=13, firstName='Sam', lastName='Thomas', email='sam.thomas@me.com', phoneNum='4207203600',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=14, firstName='Fred', lastName='Jackson', email='fred.jackson@aol.com', phoneNum='6097203600',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=15, firstName='Joe', lastName='White', email='joe.white@yahoo.com', phoneNum='2345491746',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=16, firstName='Dave', lastName='Harris', email='dave.harris@hotmail.com', phoneNum='1560785328',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=17, firstName='Ed', lastName='Martin', email='ed.martin@outlook.com', phoneNum='9998652456',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=18, firstName='Dan', lastName='Thompson', email='dan.thompson@live.com', phoneNum='7652839434',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=19, firstName='Frank', lastName='Garcia', email='frank.garcia@gmail.com', phoneNum='80800646820',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=20, firstName='Carl', lastName='Martinez', email='carl.martinez@netscape.net', phoneNum='52117503498',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=21, firstName='Kim', lastName='Robinson', email='kim.robinson@icnet.net', phoneNum='50317503498',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=22, firstName='Ron', lastName='Clark', email='ron.clark@icloud.com', phoneNum='7077774012',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=23, firstName='Art', lastName='Rodriguez', email='art.rodriguez@mac.com', phoneNum='1658372398',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+        Patron(patronID=24, firstName='Ken', lastName='Lee', email='ken.lee@me.com', phoneNum='0124126828',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2023, 10, 1)),
+    ]
+
+    # Add all to session
+    db.session.add_all(authors + item_types + items + patrons + item_authors)
+
+    # Commit the session
+    db.session.commit()
+
+    print("Database seeded successfully!")
+
