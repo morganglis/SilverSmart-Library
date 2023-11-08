@@ -77,9 +77,55 @@ def accessibility():
 def terms_pay():
     return render_template('terms_of_payment.html')
 
-@app.route('/checkin')
+
+@app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
-    return render_template('library_checkin.html')
+    due_date = None
+    patron_id = None
+    days_past_due = 0
+    patronBalance = 0
+
+
+    if request.method == 'POST':
+        item_id = request.form.get('itemID')
+        checkout = Checkout.query.filter_by(itemID=item_id).first()
+
+        if checkout:
+            due_date = checkout.dueDate
+            patron_id = checkout.patronID
+            print(f"Due Date: {due_date}")
+
+            today = datetime.now().date()
+
+            if today < due_date:
+                days_past_due = (due_date - today).days
+
+                # Update the patron's account balance
+                patron = Patron.query.get(patron_id)
+                patron.acctBalance += days_past_due
+                patronBalance = patron.acctBalance
+                db.session.commit()
+
+
+            # Update isCheckedOut to False
+            item = Item.query.get(item_id)
+            if item:
+                patron = Patron.query.get(patron_id)
+                item.isCheckedOut = False
+                patron.itemsRented -= 1
+                db.session.commit()
+            else:
+                print("Item not found.")
+
+            # Remove the checked-in item from the database
+
+            db.session.delete(checkout)
+            db.session.commit()
+        else:
+            print("Checkout record not found.")
+
+    return render_template('library_checkin.html', due_date=due_date, patron_id=patron_id, days_past_due=days_past_due, patronBalance = patronBalance)
+
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
