@@ -1,9 +1,9 @@
 {% include 'header.html' %}
-<body>
+<body class="receipt_body">
     <h3>Receipt</h3>
     <p>Patron: {{ patron.firstName }} {{ patron.lastName }}</p>
     <p>Items Checked Out:</p>
-    <ul>
+    <ul class="receipt_items">
         {% for item in receipt_data %}
             <li>{{ item.item_title }} - Due: {{ item.due_date }}</li>
         {% endfor %}
