@@ -76,9 +76,58 @@ def accessibility():
 def terms_pay():
     return render_template('terms_of_payment.html')
 
-@app.route('/checkin')
+
+@app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
-    return render_template('library_checkin.html')
+
+    due_date = None
+    patron_id = None
+    days_past_due = 0
+    patronBalance = 0
+    patron = None
+
+    if request.method == 'POST':
+        item_id = request.form.get('itemID')
+        checkout = Checkout.query.filter_by(itemID=item_id).first()
+        patron_id = request.form.get('patronID')
+        patron = Patron.query.get(patron_id)
+
+        if checkout:
+            due_date = checkout.dueDate
+            patron_id = checkout.patronID
+            print(f"Due Date: {due_date}")
+
+            today = datetime.now().date()
+
+            if due_date < today:
+                days_past_due = (today - due_date).days
+
+                # Update the patron's account balance
+                patron = Patron.query.get(patron_id)
+                patron.acctBalance += days_past_due
+                patronBalance = patron.acctBalance
+                db.session.commit()
+
+
+            # Update isCheckedOut to False
+            item = Item.query.get(item_id)
+            if item:
+                patron = Patron.query.get(patron_id)
+                item.isCheckedOut = False
+                patron.itemsRented -= 1
+                db.session.commit()
+            else:
+                print("Item not found.")
+
+            # Remove the checked-in item from the database
+
+            db.session.delete(checkout)
+            db.session.commit()
+        else:
+            print("Checkout record not found.")
+
+    return render_template('library_checkin.html', due_date=due_date, patron_id=patron_id, days_past_due=days_past_due, patronBalance = patronBalance, patron = patron)
+
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -87,6 +136,10 @@ def checkout():
 
     patron = None
     is_expired = False
+    checkouts = Checkout.query.all()
+    authors = Author.query.all()
+    items_information = Item.query.all()
+
 
     if request.method == 'POST':
         patron_id = request.form.get('patronID')
@@ -103,6 +156,7 @@ def checkout():
         if 'renew' in request.form:
             patron.date_created = datetime.utcnow()
             db.session.commit()
+
             flash('Patron ID has been renewed.', 'success')
             is_expired = False  # Update the expiration status after renewal
 
@@ -214,10 +268,11 @@ def checkout():
 
     # For GET requests or any other redirection
     items = {item.itemID: item for item in Item.query.all()}
+
     item_id = request.form.get('itemId', None)
     return render_template('library_checkout.html', patron=patron, is_expired=is_expired,
                            checkout_items=session.get('checkout_items', []),
-                           items=items, item_id=item_id)
+                           items=items, item_id=item_id, checkouts=checkouts, authors = authors, items_information = items_information)
 
 def seed_database():
     # Clears out existing data and then seeds the database with data in this

@@ -63,6 +63,22 @@
             background-color: #fff;
             margin-top: 20px;
         }
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 0 auto; /* Center the table horizontally */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        th {
+            background-color: silver;
+        }
     </style>
 </head>
 
@@ -75,6 +91,45 @@
 </form>
 
 {% if patron %}
+    <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
+    <p>Email: {{ patron.email }}</p>
+    <p>Phone Number: {{ patron.phoneNum }}</p>
+    <p>Items Rented: {{ patron.itemsRented }}</p>
+
+    <!-- Show books checked out by patron -->
+    {% if patron.itemsRented > 0 %}
+        <form>
+        <button id="showBooksButton" type="button" onclick="toggleTableVisibility()">Show Checked-Out Books</button>
+        </form>
+        <table id="booksTable" style="display: none;">
+            <tr>
+                <th>Book Name</th>
+                <th>Item Branch</th>
+                <th>Checkout ID</th>
+                <th>Patron ID</th>
+                <th>Item ID</th>
+                <th>Due Date</th>
+            </tr>
+            {% for checkout in checkouts %}
+                {% if patron.patronID == checkout.patronID %}
+                    {% for item in items_information %}
+                        {% if item.itemID == checkout.itemID %}
+                            <tr>
+                                <td>{{ item.itemTitle }}</td>
+                                <td>{{ item.itemBranch }}</td>
+                                <td>{{ checkout.checkoutID }}</td>
+                                <td>{{ checkout.patronID }}</td>
+                                <td>{{ checkout.itemID }}</td>
+                                <td>{{ checkout.dueDate }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% endif %}
+
+
     {% if is_expired %}
         <!-- Renewal message and button -->
         <p>Your ID has expired. Would you like to renew it?</p>
@@ -168,6 +223,17 @@
 <form action="{{ url_for('add_patron') }}" method="get">
     <button type="submit">Add New Patron</button>
 </form>
+
+<script>
+    function toggleTableVisibility() {
+        var booksTable = document.getElementById("booksTable");
+        if (booksTable.style.display === "none") {
+            booksTable.style.display = "table";
+        } else {
+            booksTable.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 
