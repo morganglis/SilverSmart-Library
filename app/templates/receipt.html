@@ -16,5 +16,13 @@
             window.print();
         }
     </script>
+
+{{ toastr.include_toastr_js() }}
+<script>
+    // Change Toastr position class
+    toastr.options = {
+        "positionClass": "toast-top-center"
+    };
+</script>
 </body>
 {% include 'footer.html' %}
