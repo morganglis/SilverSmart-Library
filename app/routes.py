@@ -79,15 +79,18 @@ def terms_pay():
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
+
     due_date = None
     patron_id = None
     days_past_due = 0
     patronBalance = 0
-
+    patron = None
 
     if request.method == 'POST':
         item_id = request.form.get('itemID')
         checkout = Checkout.query.filter_by(itemID=item_id).first()
+        patron_id = request.form.get('patronID')
+        patron = Patron.query.get(patron_id)
 
         if checkout:
             due_date = checkout.dueDate
@@ -96,8 +99,8 @@ def checkin():
 
             today = datetime.now().date()
 
-            if today < due_date:
-                days_past_due = (due_date - today).days
+            if due_date < today:
+                days_past_due = (today - due_date).days
 
                 # Update the patron's account balance
                 patron = Patron.query.get(patron_id)
@@ -123,7 +126,7 @@ def checkin():
         else:
             print("Checkout record not found.")
 
-    return render_template('library_checkin.html', due_date=due_date, patron_id=patron_id, days_past_due=days_past_due, patronBalance = patronBalance)
+    return render_template('library_checkin.html', due_date=due_date, patron_id=patron_id, days_past_due=days_past_due, patronBalance = patronBalance, patron = patron)
 
 
 @app.route('/checkout', methods=['GET', 'POST'])
@@ -133,6 +136,10 @@ def checkout():
 
     patron = None
     is_expired = False
+    checkouts = Checkout.query.all()
+    authors = Author.query.all()
+    items_information = Item.query.all()
+
 
     if request.method == 'POST':
         patron_id = request.form.get('patronID')
@@ -149,6 +156,7 @@ def checkout():
         if 'renew' in request.form:
             patron.date_created = datetime.utcnow()
             db.session.commit()
+
             flash('Patron ID has been renewed.', 'success')
             is_expired = False  # Update the expiration status after renewal
 
@@ -260,10 +268,11 @@ def checkout():
 
     # For GET requests or any other redirection
     items = {item.itemID: item for item in Item.query.all()}
+
     item_id = request.form.get('itemId', None)
     return render_template('library_checkout.html', patron=patron, is_expired=is_expired,
                            checkout_items=session.get('checkout_items', []),
-                           items=items, item_id=item_id)
+                           items=items, item_id=item_id, checkouts=checkouts, authors = authors, items_information = items_information)
 
 def seed_database():
     # Clears out existing data and then seeds the database with data in this

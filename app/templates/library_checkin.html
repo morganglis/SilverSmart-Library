@@ -66,12 +66,14 @@
     <input type="text" id="itemID" name="itemID" required>
     <button type="submit">Check In</button>
 </form>
-
-{% if due_date %}
-    <p>Due Date: {{ due_date }}</p>
-    <p>Patron ID: {{ patron_id }}</p>
-    {% if days_past_due is defined %}
-        <p>Days Past Due: {{ days_past_due }}. Balance Due: ${{ patronBalance }}</p>
+{% if patron %}
+    {% if due_date %}
+        <p>Due Date: {{ due_date }}</p>
+        <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
+        <p>Patron ID: {{ patron_id }}</p>
+        {% if days_past_due is defined %}
+            <p>Days Past Due: {{ days_past_due }}. Balance Due: ${{ patronBalance }}</p>
+        {% endif %}
     {% endif %}
 {% endif %}
 
