@@ -27,6 +27,8 @@ class Item(db.Model):
     itemBranch = db.Column(db.String(50))
     typeID = db.Column(db.SmallInteger, db.ForeignKey('item_type.typeID'))
     isCheckedOut = db.Column(db.Boolean, default=False, nullable=False)  # Added attribute for item availability
+    isAvailable = db.Column(db.Boolean, default=True, nullable=False)
+    itemCondition = db.Column(db.String(50))
     checkouts = db.relationship('Checkout', backref='item', lazy='dynamic')
     authors = db.relationship('Author', secondary='item_authors', backref=db.backref('items', lazy='dynamic'))
 
@@ -55,3 +57,11 @@ class Branch(db.Model):
 class ItemBranch(db.Model):
     branchID = db.Column(db.SmallInteger, db.ForeignKey('branch.branchID'), primary_key=True)
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
+
+class Checkin(db.Model):
+    patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID'), primary_key=True)
+    itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
+    checkinID = db.Column(db.SmallInteger, primary_key=True)
+    returnDate = db.Column(db.Date)
+    patron = db.relationship('Patron', backref='checkins')
+    item = db.relationship('Item', backref='checkins')
