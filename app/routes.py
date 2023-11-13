@@ -297,40 +297,118 @@ def seed_database():
     authors = [
         Author(authorID=1, firstName='F. Scott', lastName='Fitzgerald'),
         Author(authorID=2, firstName='George', lastName='Orwell'),
-
+        Author(authorID=3, firstName='Mary', lastName='Shelley'),
+        Author(authorID=4, firstName='Bram', lastName='Stoker'),
+        Author(authorID=5, firstName='H.P.', lastName='Lovecraft'),
+        Author(authorID=6, firstName='Stephen', lastName='King'),
+        Author(authorID=7, firstName='Jeff', lastName='Hams'),
+        Author(authorID=8, firstName='J.K.', lastName='Rowling'),
+        Author(authorID=9, firstName='J.R.R.', lastName='Tolkien'),
+        Author(authorID=10, firstName='J.D.', lastName='Salinger'),
+        Author(authorID=11, firstName='Mark', lastName='Twain'),
+        Author(authorID=12, firstName='William', lastName='Shakespeare'),
+        Author(authorID=13, firstName='Charles', lastName='Dickens'),
+        Author(authorID=14, firstName='Jules', lastName='Verne'),
+        Author(authorID=15, firstName='Agatha', lastName='Christie'),
     ]
 
     # Add item types
     item_types = [
         ItemType(typeID=1, typeName='Book', rentDuration=14),
-        ItemType(typeID=2, typeName='DVD', rentDuration=7),
-
+        ItemType(typeID=2, typeName='Magazine', rentDuration=2),
+        ItemType(typeID=3, typeName='Classic Movie', rentDuration=7),
+        ItemType(typeID=4, typeName='New Release', rentDuration=3),
+        ItemType(typeID=5, typeName='Reference', rentDuration=5),
     ]
 
     # Add items
     items = [
         Item(itemID=1, itemTitle='The Great Gatsby', publishDate=datetime(1925, 4, 10), itemBranch='Main', typeID=1),
         Item(itemID=2, itemTitle='1984', publishDate=datetime(1949, 6, 8), itemBranch='Downtown', typeID=1),
-
+        Item(itemID=3, itemTitle='Frankenstein', publishDate=datetime(1945, 8, 17), itemBranch='Main', typeID=1),
+        Item(itemID=4, itemTitle='Dracula', publishDate=datetime(1897, 5, 26), itemBranch='Downtown', typeID=1),
+        Item(itemID=5, itemTitle='Call of Cthulhu', publishDate=datetime(1928, 5, 1), itemBranch='Main', typeID=1),
+        Item(itemID=6, itemTitle='IT', publishDate=datetime(1986, 9, 15), itemBranch='Downtown', typeID=1),
+        Item(itemID=7, itemTitle='Ham and Eggs A SCRUM Love Story', publishDate=datetime(2020, 9, 1), itemBranch='Main', typeID=1),
+        Item(itemID=8, itemTitle='Harry Potter and the Sorcerer\'s Stone', publishDate=datetime(1997, 6, 26), itemBranch='Downtown', typeID=1),
+        Item(itemID=9, itemTitle='The Hobbit', publishDate=datetime(1937, 9, 21), itemBranch='Main', typeID=1),
+        Item(itemID=10, itemTitle='The Catcher in the Rye', publishDate=datetime(1951, 7, 16), itemBranch='Downtown', typeID=1),
+        Item(itemID=11, itemTitle='The Adventures of Tom Sawyer', publishDate=datetime(1876, 12, 1), itemBranch='Main', typeID=1),
+        Item(itemID=12, itemTitle='Romeo and Juliet', publishDate=datetime(1597, 1, 1), itemBranch='Downtown', typeID=1),
+        Item(itemID=13, itemTitle='A Tale of Two Cities', publishDate=datetime(1859, 4, 30), itemBranch='Main', typeID=1),
+        Item(itemID=14, itemTitle='Twenty Thousand Leagues Under the Sea', publishDate=datetime(1870, 1, 1), itemBranch='Downtown', typeID=1),
+        Item(itemID=15, itemTitle='Murder on the Orient Express', publishDate=datetime(1934, 2, 28), itemBranch='Main', typeID=1),
     ]
 
     # Add ItemAuthors associations
     item_authors = [
         ItemAuthors(authorID=1, itemID=1),
         ItemAuthors(authorID=2, itemID=2),
-
+        ItemAuthors(authorID=3, itemID=3),
+        ItemAuthors(authorID=4, itemID=4),
+        ItemAuthors(authorID=5, itemID=5),
+        ItemAuthors(authorID=6, itemID=6),
+        ItemAuthors(authorID=7, itemID=7),
+        ItemAuthors(authorID=8, itemID=8),
+        ItemAuthors(authorID=9, itemID=9),
+        ItemAuthors(authorID=10, itemID=10),
+        ItemAuthors(authorID=11, itemID=11),
+        ItemAuthors(authorID=12, itemID=12),
+        ItemAuthors(authorID=13, itemID=13),
+        ItemAuthors(authorID=14, itemID=14),
+        ItemAuthors(authorID=15, itemID=15),
     ]
 
     # Add patrons
     patrons = [
         Patron(patronID=1, firstName='John', lastName='Doe', email='john.doe@example.com', phoneNum='1234567890',
-               acctBalance=15.75, itemsRented=2, date_created=datetime(2023, 10, 1)),
+               acctBalance=15.75, itemsRented=2, date_created=datetime(2013, 5, 8)),
         Patron(patronID=2, firstName='Jane', lastName='Smith', email='jane.smith@example.com', phoneNum='0987654321',
-               acctBalance=0.00, itemsRented=5, date_created=datetime(2023, 10, 1)),
+               acctBalance=0.00, itemsRented=5, date_created=datetime(2015, 2, 24)),
         Patron(patronID=3, firstName='Jim', lastName='Johns', email='jim.johns@aol.com', phoneNum='9192012654',
-               acctBalance=0.00, itemsRented=5, date_created=datetime(2020, 10, 1)),
+               acctBalance=8.00, itemsRented=5, date_created=datetime(2020, 10, 1)),
         Patron(patronID=4, firstName='Don', lastName='Johnson', email='d.johnson@yahoo.com', phoneNum='9192022654',
-               acctBalance=0.00, itemsRented=21, date_created=datetime(2023, 10, 1)),
+               acctBalance=0.00, itemsRented=21, date_created=datetime(2019, 9, 11)),
+        Patron(patronID=5, firstName='Bob', lastName='Jones', email='bob.jones@hotmail.com', phoneNum='9192032654',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 12, 30)),
+        Patron(patronID=6, firstName='Sally', lastName='Williams', email='sally.williams@outlook.com', phoneNum='6192032654',
+                acctBalance=20.25, itemsRented=10, date_created=datetime(2012, 7, 2)),
+        Patron(patronID=7, firstName='Mary', lastName='Brown', email='mary.brown@live.com', phoneNum='2052032654',
+                acctBalance=1.50, itemsRented=1, date_created=datetime(2018, 3, 14)),
+        Patron(patronID=8, firstName='Sue', lastName='Davis', email='sue.davis@gmail.com', phoneNum='8002032654',
+                acctBalance=0.00, itemsRented=7, date_created=datetime(2013, 8, 23)),
+        Patron(patronID=9, firstName='Mike', lastName='Miller', email='mike.miller@netscape.net', phoneNum='6570583230',
+                acctBalance=0.00, itemsRented=18, date_created=datetime(2021, 10, 6)),
+        Patron(patronID=10, firstName='Bill', lastName='Wilson', email='bill.wilson@icnet.net', phoneNum='0857651273',
+                acctBalance=0.00, itemsRented=3, date_created=datetime(2014, 11, 13)),
+        Patron(patronID=11, firstName='Tom', lastName='Moore', email='tom.more@icloud.com', phoneNum='9865390253',
+                acctBalance=12.50, itemsRented=8, date_created=datetime(2012, 6, 10)),
+        Patron(patronID=12, firstName='Tim', lastName='Taylor', email='tim.taylor@mac.com', phoneNum='1237534087',
+                acctBalance=0.00, itemsRented=4, date_created=datetime(2017, 4, 22)),
+        Patron(patronID=13, firstName='Sam', lastName='Thomas', email='sam.thomas@me.com', phoneNum='4207203600',
+                acctBalance=0.00, itemsRented=13, date_created=datetime(2022, 5, 3)),
+        Patron(patronID=14, firstName='Fred', lastName='Jackson', email='fred.jackson@aol.com', phoneNum='6097203600',
+                acctBalance=0.00, itemsRented=10, date_created=datetime(2015, 6, 27)),
+        Patron(patronID=15, firstName='Joe', lastName='White', email='joe.white@yahoo.com', phoneNum='2345491746',
+                acctBalance=0.00, itemsRented=5, date_created=datetime(2022, 7, 20)),
+        Patron(patronID=16, firstName='Dave', lastName='Harris', email='dave.harris@hotmail.com', phoneNum='1560785328',
+                acctBalance=35.00, itemsRented=0, date_created=datetime(2014, 12, 25)),
+        Patron(patronID=17, firstName='Ed', lastName='Martin', email='ed.martin@outlook.com', phoneNum='9998652456',
+                acctBalance=0.00, itemsRented=30, date_created=datetime(2019, 5, 16)),
+        Patron(patronID=18, firstName='Dan', lastName='Thompson', email='dan.thompson@live.com', phoneNum='7652839434',
+                acctBalance=0.00, itemsRented=16, date_created=datetime(2018, 8, 29)),
+        Patron(patronID=19, firstName='Frank', lastName='Garcia', email='frank.garcia@gmail.com', phoneNum='80800646820',
+                acctBalance=2.00, itemsRented=9, date_created=datetime(2017, 12, 8)),
+        Patron(patronID=20, firstName='Carl', lastName='Martinez', email='carl.martinez@netscape.net', phoneNum='52117503498',
+                acctBalance=0.00, itemsRented=2, date_created=datetime(2020, 9, 28)),
+        Patron(patronID=21, firstName='Kim', lastName='Robinson', email='kim.robinson@icnet.net', phoneNum='50317503498',
+                acctBalance=0.00, itemsRented=17, date_created=datetime(2016, 2, 16)),
+        Patron(patronID=22, firstName='Ron', lastName='Clark', email='ron.clark@icloud.com', phoneNum='7077774012',
+                acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 1, 4)),
+        Patron(patronID=23, firstName='Art', lastName='Rodriguez', email='art.rodriguez@mac.com', phoneNum='1658372398',
+                acctBalance=2.25, itemsRented=6, date_created=datetime(2016, 7, 31)),
+        Patron(patronID=24, firstName='Ken', lastName='Lee', email='ken.lee@me.com', phoneNum='0124126828',
+                acctBalance=0.00, itemsRented=1, date_created=datetime(2023, 8, 21)),
     ]
 
     # Add all to session
