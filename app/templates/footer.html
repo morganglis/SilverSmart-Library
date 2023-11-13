@@ -19,14 +19,12 @@
                     <a href="{{ url_for('terms_pay') }}">Terms of Payment</a>
                     <a href="{{ url_for('terms_use') }}">Terms of Use</a>
                 </div>
-
-                <div class="footer_third">
-                    <h1>Support Us</h1>
-                    <a href="#">Friends of the Library</a>
-                    <a href="#">Volunteer</a>
-                    <a href="#">Library Foundation</a>
-                    <a href="#">Donate</a>
-                </div>
+            <div class="footer_third">
+                <h1>Support Us</h1>
+                <a href="#">Friends of the Library</a>
+                <a href="{{ url_for('volunteer') }}">Volunteer</a>
+                <a href="#">Library Foundation</a>
+                <a href="{{ url_for('donate') }}">Donate</a>
             </div>
         </footer>
 </body>
