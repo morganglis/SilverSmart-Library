@@ -60,21 +60,35 @@ def library():
     # This is how we to the index page.
     return render_template('index.html')
 
+
 @app.route('/privacy')
 def privacy():
     return render_template('privacy_policy.html')
+
 
 @app.route('/terms_use')
 def terms_use():
     return render_template('terms_of_use.html')
 
+
 @app.route('/accessibility')
 def accessibility():
     return render_template('accessibility.html')
 
+
 @app.route('/terms_pay')
 def terms_pay():
     return render_template('terms_of_payment.html')
+
+
+@app.route('/volunteer')
+def volunteer():
+    return render_template('volunteer.html')
+
+
+@app.route('/donate')
+def donate():
+    return render_template('donate.html')
 
 
 @app.route('/checkin', methods=['GET', 'POST'])
