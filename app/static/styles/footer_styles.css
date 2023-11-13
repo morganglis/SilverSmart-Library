@@ -6,7 +6,7 @@
 }
 
 footer { /* format the whole footer */
-    width: 100vw;
+    width: 100%;
     display: block;
     overflow: hidden;
     padding: 10px 0;

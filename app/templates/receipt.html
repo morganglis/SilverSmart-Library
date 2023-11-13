@@ -1,5 +1,6 @@
 {% include 'header.html' %}
 <body class="receipt_body">
+    <div class="main-container">
     <h3>Receipt</h3>
     <p>Patron: {{ patron.firstName }} {{ patron.lastName }}</p>
     <p>Items Checked Out:</p>
@@ -9,7 +10,7 @@
         {% endfor %}
     </ul>
 
-    <button onclick="printReceipt()">Print this page</button>
+    <button onclick="printReceipt()" style="font-size: 20px">Print this page</button>
 
     <script>
         function printReceipt() {
@@ -24,5 +25,6 @@
         "positionClass": "toast-top-center"
     };
 </script>
+    </div>
 </body>
 {% include 'footer.html' %}
