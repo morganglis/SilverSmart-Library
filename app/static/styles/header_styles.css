@@ -96,4 +96,30 @@ a {
     color: rgb(0, 0, 0); /* Change the color to your desired value */
 }
 
+.nav-button {
+    display: inline-block; /* Allows setting padding and width */
+    padding: 10px;
+    background-color: rgb(203, 210, 218);
+    color: black;
+    text-align: center;
+    text-decoration: none; /* Removes underline from links */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.nav-button:hover {
+    background-color: rgb(71, 74, 74);
+    color: white;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    display: inline; /* Align buttons in a row */
+    margin-right: 10px; /* Space between buttons */
+}
 
