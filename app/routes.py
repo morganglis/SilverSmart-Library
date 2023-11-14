@@ -340,6 +340,7 @@ def seed_database():
     # db.session.query(ItemAuthors).delete()
     # db.session.query(Author).delete()
 
+
     db.session.query(ItemAuthors).delete()
     db.session.query(Checkout).delete()
     db.session.query(Item).delete()
