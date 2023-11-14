@@ -470,6 +470,7 @@ def seed_database():
                 acctBalance=0.00, itemsRented=21, date_created=datetime(2023, 8, 21)),
     ]
 
+
     db.session.add_all(patrons)
     db.session.commit()
 
