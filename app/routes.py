@@ -334,11 +334,11 @@ def seed_database():
     # Clears out existing data and then seeds the database with data in this
 
     db.session.query(Checkout).delete()
-    db.session.query(Author).delete()
     db.session.query(Item).delete()
     db.session.query(ItemType).delete()
     db.session.query(Patron).delete()
     db.session.query(ItemAuthors).delete()
+    db.session.query(Author).delete()
 
     # Add authors
     authors = [
