@@ -340,13 +340,15 @@ def seed_database():
     # db.session.query(ItemAuthors).delete()
     # db.session.query(Author).delete()
 
-
-    db.session.query(ItemAuthors).delete()
+    db.session.query(Checkin).delete()
     db.session.query(Checkout).delete()
+    db.session.query(ItemAuthors).delete()
     db.session.query(Item).delete()
-    db.session.query(ItemType).delete()
-    db.session.query(Patron).delete()
     db.session.query(Author).delete()
+    db.session.query(Patron).delete()
+    db.session.query(ItemType).delete()
+    db.session.query(ItemBranch).delete()
+    db.session.query(Branch).delete()
 
     # Add authors
     authors = [
