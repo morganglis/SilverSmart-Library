@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
-from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # import the tables you need to access
+from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors, Branch, ItemBranch, Checkin
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -59,6 +59,25 @@ def create_patron():
     flash('New patron added successfully!')
     return redirect(url_for('checkout'))
 
+@app.route('/database-overview')
+def database_overview():
+    patrons = Patron.query.all()
+    itemTypes = ItemType.query.all()
+    items = Item.query.all()
+    checkouts = Checkout.query.all()
+    authors = Author.query.all()
+    itemAuthors = ItemAuthors.query.all()
+    branches = Branch.query.all()
+    itemBranches = ItemBranch.query.all()
+    checkins = Checkin.query.all()
+
+    return render_template('database_overview.html', patrons=patrons,
+                           itemTypes=itemTypes, items=items,
+                           checkouts=checkouts, authors=authors,
+                           itemAuthors=itemAuthors, branches=branches,
+                           itemBranches=itemBranches, checkins=checkins)
+
+
 
 @app.route('/')
 def library():
@@ -98,57 +117,69 @@ def donate():
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
-
-    due_date = None
-    patron_id = None
-    days_past_due = 0
-    patronBalance = 0
-    patron = None
-
     if request.method == 'POST':
         item_id = request.form.get('itemID')
+        is_damaged = request.form.get('isDamaged') == 'yes'
+
+        item = Item.query.get(item_id)
         checkout = Checkout.query.filter_by(itemID=item_id).first()
-        patron_id = request.form.get('patronID')
-        patron = Patron.query.get(patron_id)
 
-        if checkout:
-            due_date = checkout.dueDate
-            patron_id = checkout.patronID
-            print(f"Due Date: {due_date}")
+        if not item.isCheckedOut:
+            flash("Book is not checked out.", 'error')
+            return redirect(url_for('checkin'))
 
-            today = datetime.now().date()
+        patron = Patron.query.get(checkout.patronID)
+        due_date = checkout.dueDate
+        today = datetime.now().date()
 
-            if due_date < today:
-                days_past_due = (today - due_date).days
-
-                # Update the patron's account balance
-                patron = Patron.query.get(patron_id)
-                patron.acctBalance += days_past_due
-                patronBalance = patron.acctBalance
-                db.session.commit()
-
-
-            # Update isCheckedOut to False
-            item = Item.query.get(item_id)
-            if item:
-                patron = Patron.query.get(patron_id)
+        if item:
+            if is_damaged:
+                item.itemCondition = "Damaged"
+                item.isAvailable = False
                 item.isCheckedOut = False
-                item.isSecure = True
-                patron.itemsRented -= 1
-                flash(f'Chip detection service has been turned ON for Item {item_id}', 'info')
-                db.session.commit()
+                patron.itemsRented -= 1  # decrement the number of items rented by the patron
+                flash(f'Place {item_id} in damaged bin.', 'warning')
+            elif item.itemBranch != 'Main':
+                item.isCheckedOut = False # item is checked in
+                item.isAvailable = False # item is not available because it is in transit
+                item.inTransit = True  # Show that the item is in cart for transit
+                patron.itemsRented -= 1  # decrement the number of items rented by the patron
+                flash(f'Item {item_id} should be placed in {item.itemBranch} cart.', 'info')
             else:
-                print("Item not found.")
+                item.isCheckedOut = False
+                item.isAvailable = True
+                item.isSecure = True
+                patron.itemsRented -= 1  # decrement the number of items rented by the patron
+                flash(f'Chip detection service has been turned ON for Item {item_id}', 'info')
 
-            # Remove the checked-in item from the database
+            fee = calculate_fees(due_date, today)
+            patron.acctBalance += fee
 
-            db.session.delete(checkout)
-            db.session.commit()
+            if fee > 0:
+                flash(f'Late return fee of ${fee:.2f} added to account.', 'warning')
+
+
+            # Create a new Checkin record
+            new_checkin = Checkin(patronID=patron.patronID, itemID=item_id, returnDate=today)
+            db.session.add(new_checkin)
+
+            # Optional: Delete the checkout record
+            # db.session.delete(checkout)
+
+            db.session.commit()  # Commit the changes to the database
+
+            flash(f'Item {item_id} checked in successfully.', 'success')
         else:
-            print("Checkout record not found.")
+            flash("Item not found.", 'error')
 
-    return render_template('library_checkin.html', due_date=due_date, patron_id=patron_id, days_past_due=days_past_due, patronBalance = patronBalance, patron = patron)
+    return render_template('library_checkin.html')
 
+
+def calculate_fees(due_date, return_date):
+    if return_date > due_date:
+        days_past_due = (return_date - due_date).days
+        return Decimal(days_past_due) * Decimal('1.00')
+    return Decimal('0.00')
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -208,7 +239,7 @@ def checkout():
         elif 'add_item' in request.form:
             item_id = request.form.get('itemId')
             item = Item.query.get(item_id)
-            if item and not item.isCheckedOut and patron.itemsRented < 20:
+            if item and not item.isCheckedOut and item.isAvailable and patron.itemsRented < 20:
                 session['checkout_items'].append(item_id)
                 item.isCheckedOut = True  # Mark the item as checked out
                 patron.itemsRented += 1  # Increment the number of items rented by the patron
@@ -216,6 +247,8 @@ def checkout():
                 flash(f'Item {item_id} added to checkout list.', 'success')
             elif item and item.isCheckedOut:
                 flash(f'Item {item_id} is already checked out.', 'error')
+            elif item and not item.isAvailable:
+                flash(f'Item {item_id} is in transit to other branch.', 'error')
             elif patron.itemsRented >= 20:
                 flash('You cannot check out more than 20 items.', 'error')
             else:
