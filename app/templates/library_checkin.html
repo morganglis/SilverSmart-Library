@@ -9,37 +9,37 @@
             padding-top: 80px;
         }
         .main-content1{
-            padding-top: 200px;
-            min-height: calc(60vh - 80px);
+            min-height: calc(75vh - 80px);
         }
         .flex_cont{
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-content: center;
             flex-wrap: wrap;
-            padding-right: 700px;
-        }
-        .flex_cont > form, .flex_cont > .patron_info{
-            flex-basis: 400px;
-            flex-grow: 0;
-            flex-shrink: 0;
+            padding-right: 38%;
         }
         .patron_info{
-            padding-right: 200px;
+            margin-right: 20px;
             font-size: 25px;
+            padding-left: 5%;
+            padding-top: 5%;
+            flex: 1 1 auto;
         }
         h2 {
-            background-color: rgb(203, 210, 218);
+            background-color: #3498db;
             color: #fff;
             padding: 10px;
             text-align: center;
         }
         form {
             max-width: 400px;
+            margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border: 1px solid #ddd;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: block;
+            flex: 0 0 400px;
         }
         label {
             display: block;
@@ -53,7 +53,7 @@
             border-radius: 5px;
         }
         button {
-            display: block;
+            display: inline-block;
             width: 100%;
             padding: 10px;
             background-color: rgb(203, 210, 218);
@@ -66,9 +66,8 @@
             background-color: rgb(71, 74, 74);
         }
         p {
-            font-weight: bold;
-            text-align: center;
-            justify-content: center;
+            padding: 4px;
+            text-align: left;
         }
         ul {
             list-style-type: none;
@@ -85,12 +84,12 @@
         <div class="patron_info">
             {% if patron %}
                 {% if due_date %}
-                    <p>Due Date: {{ due_date }}</p>
-                    <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
-                    <p>Patron ID: {{ patron_id }}</p>
+                    <p><strong>Date: </strong>{{ due_date }}</p>
+                    <p><strong>Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
+                    <p><strong>ID: </strong>{{ patron_id }}</p>
                     {% if days_past_due is defined %}
-                        <p>Days Past Due: {{ days_past_due }}.</p>
-                        <p>Balance Due: ${{ patronBalance }}</p>
+                        <p><strong>Past Due: </strong>{{ days_past_due }}.</p>
+                        <p><strong>Due: </strong>${{ patronBalance }}</p>
                     {% endif %}
                 {% endif %}
             {% endif %}
