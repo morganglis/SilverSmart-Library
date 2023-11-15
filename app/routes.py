@@ -257,21 +257,24 @@ def checkout():
         elif 'add_item' in request.form:
             item_id = request.form.get('itemId')
             item = Item.query.get(item_id)
-            if item and not item.isCheckedOut and item.isAvailable and patron.itemsRented < 20:
-                session['checkout_items'].append(item_id)
-                item.isCheckedOut = True  # Mark the item as checked out
-                patron.itemsRented += 1  # Increment the number of items rented by the patron
-                db.session.commit()  # Commit the change to the database
-                flash(f'Item {item_id} added to checkout list.', 'success')
-            elif item and item.isCheckedOut:
-                flash(f'Item {item_id} is already checked out.', 'error')
-            elif item and not item.isAvailable:
-                flash(f'Item {item_id} is in transit to other branch.', 'error')
-            elif patron.itemsRented >= 20:
-                flash('You cannot check out more than 20 items.', 'error')
+
+            if item:
+                if not item.isCheckedOut and item.isAvailable and patron.itemsRented < 20:
+                    session['checkout_items'].append(item_id)
+                    item.isCheckedOut = True  # Mark the item as checked out
+                    patron.itemsRented += 1  # Increment the number of items rented by the patron
+                    db.session.commit()  # Commit the change to the database
+                    flash(f'Item {item_id} added to checkout list.', 'success')
+                elif item.isCheckedOut:
+                    flash(f'Item {item_id} is already checked out.', 'error')
+                elif not item.isAvailable and item.itemCondition != "Damaged":
+                    flash(f'Item {item_id} is in transit to other branch.', 'error')
+                elif item.itemCondition == "Damaged":
+                    flash(f'Item {item_id} is damaged and not available for checkout', 'error')
+                elif patron.itemsRented >= 20:
+                    flash('You cannot check out more than 20 items.', 'error')
             else:
                 flash(f'Item {item_id} not found.', 'error')
-
 
         if 'remove_item' in request.form:
             item_id_to_remove = request.form.get('itemIDToRemove')
