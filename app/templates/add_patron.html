@@ -1,20 +1,22 @@
 {% include 'header.html' %}
-<form action="{{ url_for('create_patron') }}" method="post">
-  <label for="patronID">Patron ID:</label>
-  <input type="number" id="patronID" name="patronID" required>
+<div class="foot_head_fixer">
+    <form action="{{ url_for('create_patron') }}" method="post">
+      <label for="patronID">Patron ID:</label>
+      <input type="number" id="patronID" name="patronID" required>
 
-  <label for="firstName">First Name:</label>
-  <input type="text" id="firstName" name="firstName" required>
+      <label for="firstName">First Name:</label>
+      <input type="text" id="firstName" name="firstName" required>
 
-  <label for="lastName">Last Name:</label>
-  <input type="text" id="lastName" name="lastName" required>
+      <label for="lastName">Last Name:</label>
+      <input type="text" id="lastName" name="lastName" required>
 
-  <label for="email">Email:</label>
-  <input type="email" id="email" name="email" required>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
 
-  <label for="phoneNum">Phone Number:</label>
-  <input type="text" id="phoneNum" name="phoneNum" required>
+      <label for="phoneNum">Phone Number:</label>
+      <input type="text" id="phoneNum" name="phoneNum" required>
 
-  <input type="submit" value="Add Patron">
-</form>
+      <input type="submit" value="Add Patron">
+    </form>
+</div>
 {%  include 'footer.html' %}
