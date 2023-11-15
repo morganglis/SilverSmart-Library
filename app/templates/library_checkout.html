@@ -24,6 +24,7 @@
             background-color: #fff;
             border: 1px solid #ddd;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: block
         }
         label {
             display: block;
@@ -37,7 +38,7 @@
             border-radius: 5px;
         }
         button {
-            display: block;
+            display: inline-block;
             width: 100%;
             padding: 10px;
             background-color: rgb(203, 210, 218);
@@ -50,8 +51,8 @@
             background-color: rgb(71, 74, 74);
         }
         p {
-            font-weight: bold;
-            text-align: center;
+            padding: 4px;
+            text-align: left;
         }
         ul {
             list-style-type: none;
@@ -81,7 +82,7 @@
         }
         th {
             background-color: silver;
-        }
+        }       
     </style>
 </head>
 
@@ -95,11 +96,12 @@
 </form>
 
 {% if patron %}
-    <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
-    <p>Email: {{ patron.email }}</p>
-    <p>Phone Number: {{ patron.phoneNum }}</p>
-    <p>Items Rented: {{ patron.itemsRented }}</p>
-
+<div style="float: left; margin-left: 65px; font-size: 25px;">
+    <p><strong>Patron Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
+    <p><strong>Email: </strong>{{ patron.email }}</p>
+    <p><strong>Phone Number: </strong>{{ patron.phoneNum }}</p>
+    <p><strong>Items Rented: </strong>{{ patron.itemsRented }}</p>
+</div>
     <!-- Show books checked out by patron -->
     {% if patron.itemsRented > 0 %}
         <form>
@@ -107,12 +109,13 @@
         </form>
         <table id="booksTable" style="display: none;">
             <tr>
-                <th>Book Name</th>
+                <th>Item Name</th>
                 <th>Item Branch</th>
                 <th>Checkout ID</th>
                 <th>Patron ID</th>
                 <th>Item ID</th>
                 <th>Due Date</th>
+                <th>Security Chip Active</th>
             </tr>
             {% for checkout in checkouts %}
                 {% if patron.patronID == checkout.patronID %}
@@ -125,6 +128,7 @@
                                 <td>{{ checkout.patronID }}</td>
                                 <td>{{ checkout.itemID }}</td>
                                 <td>{{ checkout.dueDate }}</td>
+                                <td>{{ item.isSecure }}</td>
                             </tr>
                         {% endif %}
                     {% endfor %}
@@ -161,16 +165,17 @@
 
     <!-- List of items to checkout -->
     {% if checkout_items %}
-        <p style="text-align: center;">Items to Checkout:</p>
+
+        <strong><p style="text-align: center">Items to Checkout:</p></strong>
         <ul>
             {% for item_id in checkout_items %}
                 {% if item_id and item_id|int in items %}
                     <li style="text-align: center;">
                         {{ items[item_id|int].itemTitle }} with Item ID {{ item_id }} has been added to checkout!
-                        <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block;">
+                        <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block; background-color: transparent; border:none; box-shadow: none">
                             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
                             <input type="hidden" name="itemIDToRemove" value="{{ item_id }}">
-                            <button type="submit" name="remove_item" style="background-color: red; color: #fff; border: none; border-radius: 5px; padding: 5px;">Remove</button>
+                            <button type="submit" name="remove_item" style="background-color: red; color: #fff; border: none; border-radius: 5px; padding: 5px;">X</button>
                         </form>
                     </li>
                 {% else %}
@@ -194,7 +199,6 @@
 
 
     {% endif %}
-
     <!-- Display receipt after checkout -->
     {% if receipt_data %}
         <div class="receipt">
@@ -218,11 +222,6 @@
     </form>
 {% endif %}
 
-{% for message in get_flashed_messages() %}<b>
-    <div class="flash-message" style="text-align: center;">{{ message }}</div>
-    </b>
-{% endfor %}
-
 <!-- Button to navigate to add a new patron -->
 <form action="{{ url_for('add_patron') }}" method="get">
     <button type="submit">Add New Patron</button>
@@ -238,6 +237,8 @@
         }
     }
 </script>
+
+{{ toastr.include_toastr_js() }}
 </div>
 </body>
 

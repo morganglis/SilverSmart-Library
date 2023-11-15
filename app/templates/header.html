@@ -10,6 +10,15 @@
         <div class="logo">
             <a href="{{ url_for('library') }}"> <img src="{{ url_for('static', filename='images/library_logo.png') }}" alt="Silversmart Library Logo"></a>
         </div>
+        {{ toastr.include_jquery() }}
+        {{ toastr.include_toastr_css() }}
+        {{ toastr.message() }}
+        <script>
+            // Change Toastr position class
+            toastr.options = {
+                "positionClass": "toast-top-center"
+            };
+        </script>
         <div class="tool_bar">
             <nav>
                 <ul>

@@ -4,6 +4,11 @@ from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # i
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+from flask_toastr import Toastr
+toastr = Toastr(app)
+
+app.config['TOASTR_POSITION_CLASS'] = 'toast-top-center'
+
 @app.route('/seed_db', methods=['POST'])
 def seed_db_route():
     seed_database()
@@ -128,7 +133,9 @@ def checkin():
             if item:
                 patron = Patron.query.get(patron_id)
                 item.isCheckedOut = False
+                item.isSecure = True
                 patron.itemsRented -= 1
+                flash(f'Chip detection service has been turned ON for Item {item_id}', 'info')
                 db.session.commit()
             else:
                 print("Item not found.")
@@ -256,6 +263,7 @@ def checkout():
                     if item:
                         due_date = datetime.utcnow() + timedelta(days=item.item_type.rentDuration)
                         new_checkout = Checkout(patronID=patron.patronID, itemID=item.itemID, dueDate=due_date)
+                        item.isSecure = False
                         db.session.add(new_checkout)
                         due_dates.append(due_date.strftime('%Y-%m-%d'))
                 db.session.commit()
@@ -275,6 +283,7 @@ def checkout():
                 session.pop('checkout_items', None)
 
                 # Redirect to the receipt page with the necessary data
+                flash(f'Chip detection service has been turned OFF for Item {item_id}', 'info')
                 return render_template('receipt.html', patron=patron, receipt_data=receipt_data)
             else:
                 flash('No items to checkout.', 'error')
