@@ -6,14 +6,12 @@
     }
 </style>
 <body>
-    <div class="main-content">
-        <div class="container">
-            <h2>Welcome to the SilverSmart Library System!</h2>
 
-            <form action="{{ url_for('seed_db_route') }}" method="post">
+    <h2>Welcome to the SilverSmart Library System!</h2>
+    <form action="{{ url_for('seed_db_route') }}" method="post">
                 <input type="submit" value="Seed Database" />
             </form>
-            <form action="{{ url_for('database_summary') }}" method="get">
+            <form action="{{ url_for('database_overview') }}" method="get">
                 <button type="submit">View Database Summary</button>
             </form>
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -26,18 +24,20 @@
               {% endif %}
             {% endwith %}
 
-            <div class="library_pics">
-              <button href="#">Library Photos</button>
-              <img src="{{ url_for('static',filename='images/silversmart_inside.png') }}" alt="Library Pitures">
+        <div class="container">
+
+          <div class="library_pics">
+              <img src="{{ url_for('static',filename='images/silversmart_inside.png') }}" alt="Library Pictures">
           </div>
   
           <div class="books_in_stock">
-              <button href="#">Book Selection</button>
               <img src="{{ url_for('static',filename='images/books_in_stock.png') }}" alt="Books in Stock">
           </div>
 
-          </div>
-    </div>
+
+        </div>
+
+
 </body>
 
 {% include 'footer.html' %}

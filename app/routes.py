@@ -41,6 +41,7 @@ def add_patron():
     # Display a form to add a new patron
     return render_template('add_patron.html')
 
+
 @app.route('/create_patron', methods=['POST'])
 def create_patron():
     # Get data from form submission to create a new Patron
@@ -49,14 +50,27 @@ def create_patron():
     lastName = request.form['lastName']
     email = request.form['email']
     phoneNum = request.form['phoneNum']
-    # Create a new Patron instance
-    new_patron = Patron(patronID=patronID, firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
-                        acctBalance=0.00,
-                        itemsRented=0)
-    db.session.add(new_patron)
-    db.session.commit()
 
-    flash('New patron added successfully!')
+    # Check if patronID already exists in the database
+    existing_patron = Patron.query.filter_by(patronID=patronID).first()
+
+    # If a patron with this ID already exists, flash a message and redirect
+    if existing_patron:
+        flash('A patron with this ID already exists. Please try a new ID', 'error')
+        return redirect(url_for('add_patron'))  # Assuming 'add_patron_form' is your route for adding patrons
+
+    # If patronID does not exist, create a new Patron instance
+    new_patron = Patron(patronID=patronID, firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
+                        acctBalance=0.00, itemsRented=0)
+    db.session.add(new_patron)
+
+    try:
+        db.session.commit()
+        flash('New patron added successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while adding the patron: {}'.format(e), 'error')
+
     return redirect(url_for('checkout'))
 
 @app.route('/database-overview')
@@ -137,19 +151,23 @@ def checkin():
                 item.itemCondition = "Damaged"
                 item.isAvailable = False
                 item.isCheckedOut = False
-                patron.itemsRented -= 1  # decrement the number of items rented by the patron
+                if patron.itemsRented > 0:
+                    patron.itemsRented -= 1
                 flash(f'Place {item_id} in damaged bin.', 'warning')
             elif item.itemBranch != 'Main':
                 item.isCheckedOut = False # item is checked in
                 item.isAvailable = False # item is not available because it is in transit
                 item.inTransit = True  # Show that the item is in cart for transit
-                patron.itemsRented -= 1  # decrement the number of items rented by the patron
+                if patron.itemsRented > 0:
+                    patron.itemsRented -= 1
                 flash(f'Item {item_id} should be placed in {item.itemBranch} cart.', 'info')
             else:
                 item.isCheckedOut = False
                 item.isAvailable = True
                 item.isSecure = True
-                patron.itemsRented -= 1  # decrement the number of items rented by the patron
+                if patron.itemsRented > 0:
+                    patron.itemsRented -= 1
+                flash(f'Item {item_id} should be placed in shelving cart.', 'info')
                 flash(f'Chip detection service has been turned ON for Item {item_id}', 'info')
 
             fee = calculate_fees(due_date, today)
@@ -262,7 +280,8 @@ def checkout():
                 item = Item.query.get(item_id_to_remove)
                 if item:
                     item.isCheckedOut = False
-                    patron.itemsRented -= 1
+                    if patron.itemsRented > 0:
+                        patron.itemsRented -= 1
                     db.session.commit()
                     flash(f'Item {item_id_to_remove} removed from checkout list.', 'success')
                 else:

@@ -24,6 +24,49 @@
 </head>
 <body>
     <h1>Library Database Overview</h1>
+    <form action="{{ url_for('library') }}" method="get">
+                <button type="submit">Home</button>
+            </form>
+
+    <!-- Checkout Table -->
+    <h2 class="table-title">Checkouts</h2>
+    <table>
+        <tr>
+            <th>Checkout ID</th>
+            <th>Patron ID</th>
+            <th>Item ID</th>
+            <th>Due Date</th>
+        </tr>
+        {% for checkout in checkouts %}
+        <tr>
+            <td>{{ checkout.checkoutID }}</td>
+            <td>{{ checkout.patronID }}</td>
+            <td>{{ checkout.itemID }}</td>
+            <td>{{ checkout.dueDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+    <!-- Checkin Table -->
+    <h2 class="table-title">Checkins</h2>
+    <table>
+        <tr>
+            <th>Checkin ID</th>
+            <th>Patron ID</th>
+            <th>Item ID</th>
+            <th>Return Date</th>
+        </tr>
+        {% for checkin in checkins %}
+        <tr>
+            <td>{{ checkin.checkinID }}</td>
+            <td>{{ checkin.patronID }}</td>
+            <td>{{ checkin.itemID }}</td>
+            <td>{{ checkin.returnDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
 
     <!-- Patron Table -->
     <h2 class="table-title">Patrons</h2>
@@ -98,24 +141,6 @@
         {% endfor %}
     </table>
 
-    <!-- Checkout Table -->
-    <h2 class="table-title">Checkouts</h2>
-    <table>
-        <tr>
-            <th>Checkout ID</th>
-            <th>Patron ID</th>
-            <th>Item ID</th>
-            <th>Due Date</th>
-        </tr>
-        {% for checkout in checkouts %}
-        <tr>
-            <td>{{ checkout.checkoutID }}</td>
-            <td>{{ checkout.patronID }}</td>
-            <td>{{ checkout.itemID }}</td>
-            <td>{{ checkout.dueDate }}</td>
-        </tr>
-        {% endfor %}
-    </table>
 
     <!-- Author Table -->
     <h2 class="table-title">Authors</h2>
@@ -134,71 +159,6 @@
         {% endfor %}
     </table>
 
-    <!-- ItemAuthors Table -->
-    <h2 class="table-title">Item Authors</h2>
-    <table>
-        <tr>
-            <th>Author ID</th>
-            <th>Item ID</th>
-        </tr>
-        {% for itemAuthor in itemAuthors %}
-        <tr>
-            <td>{{ itemAuthor.authorID }}</td>
-            <td>{{ itemAuthor.itemID }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <!-- Branch Table -->
-    <h2 class="table-title">Branches</h2>
-    <table>
-        <tr>
-            <th>Branch ID</th>
-            <th>Name</th>
-            <th>Address</th>
-        </tr>
-        {% for branch in branches %}
-        <tr>
-            <td>{{ branch.branchID }}</td>
-            <td>{{ branch.name }}</td>
-            <td>{{ branch.address }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <!-- ItemBranch Table -->
-    <h2 class="table-title">Item Branches</h2>
-    <table>
-        <tr>
-            <th>Branch ID</th>
-            <th>Item ID</th>
-        </tr>
-        {% for itemBranch in itemBranches %}
-        <tr>
-            <td>{{ itemBranch.branchID }}</td>
-            <td>{{ itemBranch.itemID }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <!-- Checkin Table -->
-    <h2 class="table-title">Checkins</h2>
-    <table>
-        <tr>
-            <th>Checkin ID</th>
-            <th>Patron ID</th>
-            <th>Item ID</th>
-            <th>Return Date</th>
-        </tr>
-        {% for checkin in checkins %}
-        <tr>
-            <td>{{ checkin.checkinID }}</td>
-            <td>{{ checkin.patronID }}</td>
-            <td>{{ checkin.itemID }}</td>
-            <td>{{ checkin.returnDate }}</td>
-        </tr>
-        {% endfor %}
-    </table>
 
 </body>
 </html>
