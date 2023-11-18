@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 {% include 'header.html' %}
-<head>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,28 +60,40 @@
             margin-bottom: 5px;
         }
     </style>
-</head>
 <body>
 <div class="main-content1">
-<form action="{{ url_for('checkin') }}" method="post">
-    <label for="itemID">Enter Item ID:</label>
-    <input type="text" id="itemID" name="itemID" required>
-    <button type="submit">Check In</button>
-</form>
-{% if patron %}
-    {% if due_date %}
-        <p>Due Date: {{ due_date }}</p>
-        <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
-        <p>Patron ID: {{ patron_id }}</p>
-        {% if days_past_due is defined %}
-            <p>Days Past Due: {{ days_past_due }}. Balance Due: ${{ patronBalance }}</p>
-        {% endif %}
+    <h2>Item Check-In</h2>
+    <form action="{{ url_for('checkin') }}" method="post">
+        <label for="itemID">Enter Item ID:</label>
+        <input type="text" id="itemID" name="itemID" required>
+
+        <label for="isDamaged">Is the item damaged?</label>
+        <select name="isDamaged" id="isDamaged">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+        </select>
+
+        <button type="submit">Check In</button>
+    </form>
+
+    {% if patron %}
+        <div>
+            <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
+            <p>Patron ID: {{ patron_id }}</p>
+            {% if due_date %}
+                <p>Due Date: {{ due_date }}</p>
+                {% if days_past_due > 0 %}
+                    <p>Days Past Due: {{ days_past_due }}. Balance Due: ${{ patronBalance }}</p>
+                {% endif %}
+            {% endif %}
+        </div>
     {% endif %}
-{% endif %}
 </div>
+
 
 {{ toastr.include_toastr_js() }}
 
+</body>
 {% include 'footer.html' %}
 
 

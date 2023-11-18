@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library Database Overview</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .table-title {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Library Database Overview</h1>
+    <form action="{{ url_for('library') }}" method="get">
+                <button type="submit">Home</button>
+            </form>
+
+    <!-- Checkout Table -->
+    <h2 class="table-title">Checkouts</h2>
+    <table>
+        <tr>
+            <th>Checkout ID</th>
+            <th>Patron ID</th>
+            <th>Item ID</th>
+            <th>Due Date</th>
+        </tr>
+        {% for checkout in checkouts %}
+        <tr>
+            <td>{{ checkout.checkoutID }}</td>
+            <td>{{ checkout.patronID }}</td>
+            <td>{{ checkout.itemID }}</td>
+            <td>{{ checkout.dueDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+    <!-- Checkin Table -->
+    <h2 class="table-title">Checkins</h2>
+    <table>
+        <tr>
+            <th>Checkin ID</th>
+            <th>Patron ID</th>
+            <th>Item ID</th>
+            <th>Return Date</th>
+        </tr>
+        {% for checkin in checkins %}
+        <tr>
+            <td>{{ checkin.checkinID }}</td>
+            <td>{{ checkin.patronID }}</td>
+            <td>{{ checkin.itemID }}</td>
+            <td>{{ checkin.returnDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+    <!-- Patron Table -->
+    <h2 class="table-title">Patrons</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Account Balance</th>
+            <th>Items Rented</th>
+            <th>Date Created</th>
+        </tr>
+        {% for patron in patrons %}
+        <tr>
+            <td>{{ patron.patronID }}</td>
+            <td>{{ patron.firstName }}</td>
+            <td>{{ patron.lastName }}</td>
+            <td>{{ patron.email }}</td>
+            <td>{{ patron.phoneNum }}</td>
+            <td>{{ patron.acctBalance }}</td>
+            <td>{{ patron.itemsRented }}</td>
+            <td>{{ patron.date_created }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- ItemType Table -->
+    <h2 class="table-title">Item Types</h2>
+    <table>
+        <tr>
+            <th>Type ID</th>
+            <th>Type Name</th>
+            <th>Rent Duration</th>
+        </tr>
+        {% for itemType in itemTypes %}
+        <tr>
+            <td>{{ itemType.typeID }}</td>
+            <td>{{ itemType.typeName }}</td>
+            <td>{{ itemType.rentDuration }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Item Table -->
+    <h2 class="table-title">Items</h2>
+    <table>
+        <tr>
+            <th>Item ID</th>
+            <th>Title</th>
+            <th>Publish Date</th>
+            <th>Branch</th>
+            <th>Type ID</th>
+            <th>Checked Out</th>
+            <th>Available</th>
+            <th>Condition</th>
+            <th>Secure</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.itemID }}</td>
+            <td>{{ item.itemTitle }}</td>
+            <td>{{ item.publishDate }}</td>
+            <td>{{ item.itemBranch }}</td>
+            <td>{{ item.typeID }}</td>
+            <td>{{ item.isCheckedOut }}</td>
+            <td>{{ item.isAvailable }}</td>
+            <td>{{ item.itemCondition }}</td>
+            <td>{{ item.isSecure }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+    <!-- Author Table -->
+    <h2 class="table-title">Authors</h2>
+    <table>
+        <tr>
+            <th>Author ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+        </tr>
+        {% for author in authors %}
+        <tr>
+            <td>{{ author.authorID }}</td>
+            <td>{{ author.firstName }}</td>
+            <td>{{ author.lastName }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+</body>
+</html>
