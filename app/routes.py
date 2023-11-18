@@ -423,6 +423,18 @@ def seed_database():
         Item(itemID=13, itemTitle='A Tale of Two Cities', publishDate=datetime(1859, 4, 30), itemBranch='Main', typeID=1),
         Item(itemID=14, itemTitle='Twenty Thousand Leagues Under the Sea', publishDate=datetime(1870, 1, 1), itemBranch='Downtown', typeID=1),
         Item(itemID=15, itemTitle='Murder on the Orient Express', publishDate=datetime(1934, 2, 28), itemBranch='Main', typeID=1),
+        Item(itemID=16, itemTitle='Forbes: The Richest People in America', publishDate=datetime(2020, 10, 8), itemBranch ='Downtown', typeID=2),
+        Item(itemID=17, itemTitle='WIRED: TRON Special', publishDate=datetime(2011, 1, 16), itemBranch='Main', typeID=2),
+        Item(itemID=18, itemTitle='LIFE: Dedicated to the People Who Made It', publishDate=datetime(2000, 5, 20), itemBranch='Downtown', typeID=2),
+        Item(itemID=19, itemTitle='The Godfather', publishDate=datetime(1972, 3, 24), itemBranch='Main', typeID=3),
+        Item(itemID=20, itemTitle='Casablanca', publishDate=datetime(1942, 1, 23), itemBranch='Downtown', typeID=3),
+        Item(itemID=21, itemTitle='The Sound of Music', publishDate=datetime(1965, 4, 1), itemBranch='Main', typeID=3),
+        Item(itemID=22, itemTitle='The Matrix: Resurrections', publishDate=datetime(2021, 12, 22), itemBranch='Downtown', typeID=4),
+        Item(itemID=23, itemTitle='The Batman', publishDate=datetime(2022, 3, 4), itemBranch='Main', typeID=4),
+        Item(itemID=24, itemTitle='Mission Impossible: Dead Reckoning Part 1', publishDate=datetime(2023, 7, 11), itemBranch='Downtown', typeID=4),
+        Item(itemID=25, itemTitle='Systems Analysis and Design in a Changing World', publishDate=datetime(2016, 11, 7), itemBranch='Main', typeID=5),
+        Item(itemID=26, itemTitle='Learning Agile', publishDate=datetime(2015, 4, 2), itemBranch='Downtown', typeID=5),
+        Item(itemID=27, itemTitle='Systems Analysis & Design in an Age of Options', publishDate=datetime(2021, 1, 5), itemBranch='Main', typeID=5),
     ]
 
     db.session.add_all(items)
@@ -506,4 +518,3 @@ def seed_database():
     db.session.commit()
 
     print("Database seeded successfully!")
-
