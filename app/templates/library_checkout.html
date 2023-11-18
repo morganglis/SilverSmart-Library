@@ -1,18 +1,17 @@
-<!DOCTYPE html>
 {% include 'header.html' %}
-<head>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             margin: 0;
-            padding-top: 80px;
+            padding-top: 30px;
         }
         .main-content1{
+            display: block;
             min-height: calc(75vh - 80px);
         }
-        h2 {
-            background-color: #3498db;
+         h2 {
+            background-color: rgb(203, 210, 218);
             color: #fff;
             padding: 10px;
             text-align: center;
@@ -57,6 +56,7 @@
         ul {
             list-style-type: none;
             padding: 0;
+            margin-left: 5px;
         }
         ul li {
             margin-bottom: 5px;
@@ -69,7 +69,7 @@
         }
         table {
             border-collapse: collapse;
-            width: 50%;
+            width: 100%;
             margin: 0 auto; /* Center the table horizontally */
         }
         th, td {
@@ -82,12 +82,32 @@
         }
         th {
             background-color: silver;
-        }       
+        }
+        .unique-list-container {
+            display: flex;
+            flex-direction: column;
+
+        }
+        /* This will only affect ul elements with the class 'checkout-items' */
+        .checkout-items {
+            display: flex;
+            flex-direction: column;
+            padding-left: 0; /* Remove default list padding */
+        }
+
+        /* This will only affect li elements inside ul elements with the class 'checkout-items' */
+        .checkout-items li {
+            display: block; /* Makes the li stack vertically */
+            margin-bottom: 5px; /* Spacing between items */
+
+        }
+
+
+
     </style>
-</head>
 
 <body>
-
+<h2>Item Checkout</h2>
 <div class="main-content1">
 <form action="{{ url_for('checkout') }}" method="post">
     <label for="patron_id">Enter Patron ID:</label>
@@ -97,6 +117,7 @@
 
 {% if patron %}
 <div style="float: left; margin-left: 65px; font-size: 25px;">
+    <p><strong> Current Patron Information</strong></p>
     <p><strong>Patron Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
     <p><strong>Email: </strong>{{ patron.email }}</p>
     <p><strong>Phone Number: </strong>{{ patron.phoneNum }}</p>
@@ -106,16 +127,11 @@
     {% if patron.itemsRented > 0 %}
         <form>
         <button id="showBooksButton" type="button" onclick="toggleTableVisibility()">Show Checked-Out Books</button>
-        </form>
         <table id="booksTable" style="display: none;">
             <tr>
                 <th>Item Name</th>
                 <th>Item Branch</th>
-                <th>Checkout ID</th>
-                <th>Patron ID</th>
-                <th>Item ID</th>
                 <th>Due Date</th>
-                <th>Security Chip Active</th>
             </tr>
             {% for checkout in checkouts %}
                 {% if patron.patronID == checkout.patronID %}
@@ -124,31 +140,30 @@
                             <tr>
                                 <td>{{ item.itemTitle }}</td>
                                 <td>{{ item.itemBranch }}</td>
-                                <td>{{ checkout.checkoutID }}</td>
-                                <td>{{ checkout.patronID }}</td>
-                                <td>{{ checkout.itemID }}</td>
                                 <td>{{ checkout.dueDate }}</td>
-                                <td>{{ item.isSecure }}</td>
                             </tr>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
             {% endfor %}
         </table>
+        </form>
+
     {% endif %}
 
 
     {% if is_expired %}
         <!-- Renewal message and button -->
-        <p>Your ID has expired. Would you like to renew it?</p>
-        <form action="{{ url_for('checkout') }}" method="post">
+        <form action="{{ url_for('checkout') }}" method="post" >
+            <p>Your ID has expired. Would you like to renew it?</p>
             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
             <button type="submit" name="renew">Renew ID</button>
         </form>
     {% elif patron.acctBalance > 0 %}
         <!-- Balance message and payment form -->
-        <p>You have a balance of ${{ "%.2f"|format(patron.acctBalance) }}. Please pay the balance.</p>
+
         <form action="{{ url_for('checkout') }}" method="post">
+            <p style="text-align: center">Your account has a balance of ${{ patron.acctBalance }}. <br> Please make a payment to continue.</p>
             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
             <input type="number" name="payment" step="0.01" min="0.01" max="{{ patron.acctBalance }}" required>
             <button type="submit">Make Payment</button>
@@ -166,12 +181,12 @@
     <!-- List of items to checkout -->
     {% if checkout_items %}
 
-        <strong><p style="text-align: center">Items to Checkout:</p></strong>
-        <ul>
+    <div class="unique-list-container">
+       <ul class="checkout-items">
             {% for item_id in checkout_items %}
                 {% if item_id and item_id|int in items %}
                     <li style="text-align: center;">
-                        {{ items[item_id|int].itemTitle }} with Item ID {{ item_id }} has been added to checkout!
+                        {{ items[item_id|int].itemTitle }} added to checkout!flaskflask run
                         <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block; background-color: transparent; border:none; box-shadow: none">
                             <input type="hidden" name="patronID" value="{{ patron.patronID }}">
                             <input type="hidden" name="itemIDToRemove" value="{{ item_id }}">
@@ -183,7 +198,7 @@
                 {% endif %}
             {% endfor %}
         </ul>
-
+    </div>
         <!-- Confirm Checkout -->
         <form action="{{ url_for('checkout') }}" method="post">
             <input type="hidden" name="patronID" value="{{ patron.patronID }}">

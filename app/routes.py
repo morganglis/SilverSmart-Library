@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
-from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors  # import the tables you need to access
+from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors, Branch, ItemBranch, Checkin
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -41,6 +41,7 @@ def add_patron():
     # Display a form to add a new patron
     return render_template('add_patron.html')
 
+
 @app.route('/create_patron', methods=['POST'])
 def create_patron():
     # Get data from form submission to create a new Patron
@@ -49,15 +50,47 @@ def create_patron():
     lastName = request.form['lastName']
     email = request.form['email']
     phoneNum = request.form['phoneNum']
-    # Create a new Patron instance
-    new_patron = Patron(patronID=patronID, firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
-                        acctBalance=0.00,
-                        itemsRented=0)
-    db.session.add(new_patron)
-    db.session.commit()
 
-    flash('New patron added successfully!')
+    # Check if patronID already exists in the database
+    existing_patron = Patron.query.filter_by(patronID=patronID).first()
+
+    # If a patron with this ID already exists, flash a message and redirect
+    if existing_patron:
+        flash('A patron with this ID already exists. Please try a new ID', 'error')
+        return redirect(url_for('add_patron'))  # Assuming 'add_patron_form' is your route for adding patrons
+
+    # If patronID does not exist, create a new Patron instance
+    new_patron = Patron(patronID=patronID, firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
+                        acctBalance=0.00, itemsRented=0)
+    db.session.add(new_patron)
+
+    try:
+        db.session.commit()
+        flash('New patron added successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while adding the patron: {}'.format(e), 'error')
+
     return redirect(url_for('checkout'))
+
+@app.route('/database-overview')
+def database_overview():
+    patrons = Patron.query.all()
+    itemTypes = ItemType.query.all()
+    items = Item.query.all()
+    checkouts = Checkout.query.all()
+    authors = Author.query.all()
+    itemAuthors = ItemAuthors.query.all()
+    branches = Branch.query.all()
+    itemBranches = ItemBranch.query.all()
+    checkins = Checkin.query.all()
+
+    return render_template('database_overview.html', patrons=patrons,
+                           itemTypes=itemTypes, items=items,
+                           checkouts=checkouts, authors=authors,
+                           itemAuthors=itemAuthors, branches=branches,
+                           itemBranches=itemBranches, checkins=checkins)
+
 
 
 @app.route('/')
@@ -98,57 +131,73 @@ def donate():
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
-
-    due_date = None
-    patron_id = None
-    days_past_due = 0
-    patronBalance = 0
-    patron = None
-
     if request.method == 'POST':
         item_id = request.form.get('itemID')
+        is_damaged = request.form.get('isDamaged') == 'yes'
+
+        item = Item.query.get(item_id)
         checkout = Checkout.query.filter_by(itemID=item_id).first()
-        patron_id = request.form.get('patronID')
-        patron = Patron.query.get(patron_id)
 
-        if checkout:
-            due_date = checkout.dueDate
-            patron_id = checkout.patronID
-            print(f"Due Date: {due_date}")
+        if not item.isCheckedOut:
+            flash("Book is not checked out.", 'error')
+            return redirect(url_for('checkin'))
 
-            today = datetime.now().date()
+        patron = Patron.query.get(checkout.patronID)
+        due_date = checkout.dueDate
+        today = datetime.now().date()
 
-            if due_date < today:
-                days_past_due = (today - due_date).days
-
-                # Update the patron's account balance
-                patron = Patron.query.get(patron_id)
-                patron.acctBalance += days_past_due
-                patronBalance = patron.acctBalance
-                db.session.commit()
-
-
-            # Update isCheckedOut to False
-            item = Item.query.get(item_id)
-            if item:
-                patron = Patron.query.get(patron_id)
+        if item:
+            if is_damaged:
+                item.itemCondition = "Damaged"
+                item.isAvailable = False
                 item.isCheckedOut = False
-                item.isSecure = True
-                patron.itemsRented -= 1
-                flash(f'Chip detection service has been turned ON for Item {item_id}', 'info')
-                db.session.commit()
+                if patron.itemsRented > 0:
+                    patron.itemsRented -= 1
+                flash(f'Place {item_id} in damaged bin.', 'warning')
+            elif item.itemBranch != 'Main':
+                item.isCheckedOut = False # item is checked in
+                item.isAvailable = False # item is not available because it is in transit
+                item.inTransit = True  # Show that the item is in cart for transit
+                if patron.itemsRented > 0:
+                    patron.itemsRented -= 1
+                flash(f'Item {item_id} should be placed in {item.itemBranch} cart.', 'info')
             else:
-                print("Item not found.")
+                item.isCheckedOut = False
+                item.isAvailable = True
+                item.isSecure = True
+                if patron.itemsRented > 0:
+                    patron.itemsRented -= 1
+                flash(f'Item {item_id} should be placed in shelving cart.', 'info')
+                flash(f'Chip detection service has been turned ON for Item {item_id}', 'info')
 
-            # Remove the checked-in item from the database
+            fee = calculate_fees(due_date, today)
+            patron.acctBalance += fee
 
-            db.session.delete(checkout)
-            db.session.commit()
+            if fee > 0:
+                flash(f'Late return fee of ${fee:.2f} added to account.', 'warning')
+
+
+            # Create a new Checkin record
+            new_checkin = Checkin(patronID=patron.patronID, itemID=item_id, returnDate=today)
+            db.session.add(new_checkin)
+
+            # Optional: Delete the checkout record
+            # db.session.delete(checkout)
+
+            db.session.commit()  # Commit the changes to the database
+
+            flash(f'Item {item_id} checked in successfully.', 'success')
         else:
-            print("Checkout record not found.")
+            flash("Item not found.", 'error')
 
-    return render_template('library_checkin.html', due_date=due_date, patron_id=patron_id, days_past_due=days_past_due, patronBalance = patronBalance, patron = patron)
+    return render_template('library_checkin.html')
 
+
+def calculate_fees(due_date, return_date):
+    if return_date > due_date:
+        days_past_due = (return_date - due_date).days
+        return Decimal(days_past_due) * Decimal('1.00')
+    return Decimal('0.00')
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -208,19 +257,24 @@ def checkout():
         elif 'add_item' in request.form:
             item_id = request.form.get('itemId')
             item = Item.query.get(item_id)
-            if item and not item.isCheckedOut and patron.itemsRented < 20:
-                session['checkout_items'].append(item_id)
-                item.isCheckedOut = True  # Mark the item as checked out
-                patron.itemsRented += 1  # Increment the number of items rented by the patron
-                db.session.commit()  # Commit the change to the database
-                flash(f'Item {item_id} added to checkout list.', 'success')
-            elif item and item.isCheckedOut:
-                flash(f'Item {item_id} is already checked out.', 'error')
-            elif patron.itemsRented >= 20:
-                flash('You cannot check out more than 20 items.', 'error')
+
+            if item:
+                if not item.isCheckedOut and item.isAvailable and patron.itemsRented < 20:
+                    session['checkout_items'].append(item_id)
+                    item.isCheckedOut = True  # Mark the item as checked out
+                    patron.itemsRented += 1  # Increment the number of items rented by the patron
+                    db.session.commit()  # Commit the change to the database
+                    flash(f'Item {item_id} added to checkout list.', 'success')
+                elif item.isCheckedOut:
+                    flash(f'Item {item_id} is already checked out.', 'error')
+                elif not item.isAvailable and item.itemCondition != "Damaged":
+                    flash(f'Item {item_id} is in transit to other branch.', 'error')
+                elif item.itemCondition == "Damaged":
+                    flash(f'Item {item_id} is damaged and not available for checkout', 'error')
+                elif patron.itemsRented >= 20:
+                    flash('You cannot check out more than 20 items.', 'error')
             else:
                 flash(f'Item {item_id} not found.', 'error')
-
 
         if 'remove_item' in request.form:
             item_id_to_remove = request.form.get('itemIDToRemove')
@@ -229,7 +283,8 @@ def checkout():
                 item = Item.query.get(item_id_to_remove)
                 if item:
                     item.isCheckedOut = False
-                    patron.itemsRented -= 1
+                    if patron.itemsRented > 0:
+                        patron.itemsRented -= 1
                     db.session.commit()
                     flash(f'Item {item_id_to_remove} removed from checkout list.', 'success')
                 else:
@@ -316,12 +371,22 @@ def search():
 def seed_database():
     # Clears out existing data and then seeds the database with data in this
 
+    # db.session.query(Checkout).delete()
+    # db.session.query(Item).delete()
+    # db.session.query(ItemType).delete()
+    # db.session.query(Patron).delete()
+    # db.session.query(ItemAuthors).delete()
+    # db.session.query(Author).delete()
+
+    db.session.query(Checkin).delete()
     db.session.query(Checkout).delete()
     db.session.query(ItemAuthors).delete()
-    db.session.query(Author).delete()
     db.session.query(Item).delete()
-    db.session.query(ItemType).delete()
+    db.session.query(Author).delete()
     db.session.query(Patron).delete()
+    db.session.query(ItemType).delete()
+    db.session.query(ItemBranch).delete()
+    db.session.query(Branch).delete()
 
     # Add authors
     authors = [
@@ -342,6 +407,9 @@ def seed_database():
         Author(authorID=15, firstName='Agatha', lastName='Christie'),
     ]
 
+    db.session.add_all(authors)
+    db.session.commit()
+
     # Add item types
     item_types = [
         ItemType(typeID=1, typeName='Book', rentDuration=14),
@@ -350,6 +418,9 @@ def seed_database():
         ItemType(typeID=4, typeName='New Release', rentDuration=3),
         ItemType(typeID=5, typeName='Reference', rentDuration=5),
     ]
+
+    db.session.add_all(item_types)
+    db.session.commit()
 
     # Add items
     items = [
@@ -368,7 +439,22 @@ def seed_database():
         Item(itemID=13, itemTitle='A Tale of Two Cities', publishDate=datetime(1859, 4, 30), itemBranch='Main', typeID=1),
         Item(itemID=14, itemTitle='Twenty Thousand Leagues Under the Sea', publishDate=datetime(1870, 1, 1), itemBranch='Downtown', typeID=1),
         Item(itemID=15, itemTitle='Murder on the Orient Express', publishDate=datetime(1934, 2, 28), itemBranch='Main', typeID=1),
+        Item(itemID=16, itemTitle='Forbes: The Richest People in America', publishDate=datetime(2020, 10, 8), itemBranch ='Downtown', typeID=2),
+        Item(itemID=17, itemTitle='WIRED: TRON Special', publishDate=datetime(2011, 1, 16), itemBranch='Main', typeID=2),
+        Item(itemID=18, itemTitle='LIFE: Dedicated to the People Who Made It', publishDate=datetime(2000, 5, 20), itemBranch='Downtown', typeID=2),
+        Item(itemID=19, itemTitle='The Godfather', publishDate=datetime(1972, 3, 24), itemBranch='Main', typeID=3),
+        Item(itemID=20, itemTitle='Casablanca', publishDate=datetime(1942, 1, 23), itemBranch='Downtown', typeID=3),
+        Item(itemID=21, itemTitle='The Sound of Music', publishDate=datetime(1965, 4, 1), itemBranch='Main', typeID=3),
+        Item(itemID=22, itemTitle='The Matrix: Resurrections', publishDate=datetime(2021, 12, 22), itemBranch='Downtown', typeID=4),
+        Item(itemID=23, itemTitle='The Batman', publishDate=datetime(2022, 3, 4), itemBranch='Main', typeID=4),
+        Item(itemID=24, itemTitle='Mission Impossible: Dead Reckoning Part 1', publishDate=datetime(2023, 7, 11), itemBranch='Downtown', typeID=4),
+        Item(itemID=25, itemTitle='Systems Analysis and Design in a Changing World', publishDate=datetime(2016, 11, 7), itemBranch='Main', typeID=5),
+        Item(itemID=26, itemTitle='Learning Agile', publishDate=datetime(2015, 4, 2), itemBranch='Downtown', typeID=5),
+        Item(itemID=27, itemTitle='Systems Analysis & Design in an Age of Options', publishDate=datetime(2021, 1, 5), itemBranch='Main', typeID=5),
     ]
+
+    db.session.add_all(items)
+    db.session.commit()
 
     # Add ItemAuthors associations
     item_authors = [
@@ -389,63 +475,62 @@ def seed_database():
         ItemAuthors(authorID=15, itemID=15),
     ]
 
+    db.session.add_all(item_authors)
+    db.session.commit()
+
     # Add patrons
     patrons = [
         Patron(patronID=1, firstName='John', lastName='Doe', email='john.doe@example.com', phoneNum='1234567890',
-               acctBalance=15.75, itemsRented=2, date_created=datetime(2013, 5, 8)),
+               acctBalance=15.75, itemsRented=0, date_created=datetime(2013, 5, 8)),
         Patron(patronID=2, firstName='Jane', lastName='Smith', email='jane.smith@example.com', phoneNum='0987654321',
-               acctBalance=0.00, itemsRented=5, date_created=datetime(2015, 2, 24)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2015, 2, 24)),
         Patron(patronID=3, firstName='Jim', lastName='Johns', email='jim.johns@aol.com', phoneNum='9192012654',
-               acctBalance=8.00, itemsRented=5, date_created=datetime(2020, 10, 1)),
+               acctBalance=8.00, itemsRented=0, date_created=datetime(2020, 10, 1)),
         Patron(patronID=4, firstName='Don', lastName='Johnson', email='d.johnson@yahoo.com', phoneNum='9192022654',
-               acctBalance=0.00, itemsRented=21, date_created=datetime(2019, 9, 11)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2019, 9, 11)),
         Patron(patronID=5, firstName='Bob', lastName='Jones', email='bob.jones@hotmail.com', phoneNum='9192032654',
-                acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 12, 30)),
-        Patron(patronID=6, firstName='Sally', lastName='Williams', email='sally.williams@outlook.com', phoneNum='6192032654',
-                acctBalance=20.25, itemsRented=10, date_created=datetime(2012, 7, 2)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 12, 30)),
+        Patron(patronID=6, firstName='Sally', lastName='Williams', email='sally.williams@outlook.com',
+               phoneNum='6192032654', acctBalance=20.25, itemsRented=0, date_created=datetime(2012, 7, 2)),
         Patron(patronID=7, firstName='Mary', lastName='Brown', email='mary.brown@live.com', phoneNum='2052032654',
-                acctBalance=1.50, itemsRented=1, date_created=datetime(2018, 3, 14)),
+               acctBalance=1.50, itemsRented=0, date_created=datetime(2018, 3, 14)),
         Patron(patronID=8, firstName='Sue', lastName='Davis', email='sue.davis@gmail.com', phoneNum='8002032654',
-                acctBalance=0.00, itemsRented=7, date_created=datetime(2013, 8, 23)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 8, 23)),
         Patron(patronID=9, firstName='Mike', lastName='Miller', email='mike.miller@netscape.net', phoneNum='6570583230',
-                acctBalance=0.00, itemsRented=18, date_created=datetime(2021, 10, 6)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2021, 10, 6)),
         Patron(patronID=10, firstName='Bill', lastName='Wilson', email='bill.wilson@icnet.net', phoneNum='0857651273',
-                acctBalance=0.00, itemsRented=3, date_created=datetime(2014, 11, 13)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2014, 11, 13)),
         Patron(patronID=11, firstName='Tom', lastName='Moore', email='tom.more@icloud.com', phoneNum='9865390253',
-                acctBalance=12.50, itemsRented=8, date_created=datetime(2012, 6, 10)),
+               acctBalance=12.50, itemsRented=0, date_created=datetime(2012, 6, 10)),
         Patron(patronID=12, firstName='Tim', lastName='Taylor', email='tim.taylor@mac.com', phoneNum='1237534087',
-                acctBalance=0.00, itemsRented=4, date_created=datetime(2017, 4, 22)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2017, 4, 22)),
         Patron(patronID=13, firstName='Sam', lastName='Thomas', email='sam.thomas@me.com', phoneNum='4207203600',
-                acctBalance=0.00, itemsRented=13, date_created=datetime(2022, 5, 3)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2022, 5, 3)),
         Patron(patronID=14, firstName='Fred', lastName='Jackson', email='fred.jackson@aol.com', phoneNum='6097203600',
-                acctBalance=0.00, itemsRented=10, date_created=datetime(2015, 6, 27)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2015, 6, 27)),
         Patron(patronID=15, firstName='Joe', lastName='White', email='joe.white@yahoo.com', phoneNum='2345491746',
-                acctBalance=0.00, itemsRented=5, date_created=datetime(2022, 7, 20)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2022, 7, 20)),
         Patron(patronID=16, firstName='Dave', lastName='Harris', email='dave.harris@hotmail.com', phoneNum='1560785328',
-                acctBalance=35.00, itemsRented=0, date_created=datetime(2014, 12, 25)),
+               acctBalance=35.00, itemsRented=0, date_created=datetime(2014, 12, 25)),
         Patron(patronID=17, firstName='Ed', lastName='Martin', email='ed.martin@outlook.com', phoneNum='9998652456',
-                acctBalance=0.00, itemsRented=30, date_created=datetime(2019, 5, 16)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2019, 5, 16)),
         Patron(patronID=18, firstName='Dan', lastName='Thompson', email='dan.thompson@live.com', phoneNum='7652839434',
-                acctBalance=0.00, itemsRented=16, date_created=datetime(2018, 8, 29)),
-        Patron(patronID=19, firstName='Frank', lastName='Garcia', email='frank.garcia@gmail.com', phoneNum='80800646820',
-                acctBalance=2.00, itemsRented=9, date_created=datetime(2017, 12, 8)),
-        Patron(patronID=20, firstName='Carl', lastName='Martinez', email='carl.martinez@netscape.net', phoneNum='52117503498',
-                acctBalance=0.00, itemsRented=2, date_created=datetime(2020, 9, 28)),
-        Patron(patronID=21, firstName='Kim', lastName='Robinson', email='kim.robinson@icnet.net', phoneNum='50317503498',
-                acctBalance=0.00, itemsRented=17, date_created=datetime(2016, 2, 16)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2018, 8, 29)),
+        Patron(patronID=19, firstName='Frank', lastName='Garcia', email='frank.garcia@gmail.com', phoneNum='8080064682',
+               acctBalance=2.00, itemsRented=0, date_created=datetime(2017, 12, 8)),
+        Patron(patronID=20, firstName='Carl', lastName='Martinez', email='carl.martinez@netscape.net',
+               phoneNum='5211750349', acctBalance=0.00, itemsRented=0, date_created=datetime(2020, 9, 28)),
+        Patron(patronID=21, firstName='Kim', lastName='Robinson', email='kim.robinson@icnet.net', phoneNum='5031750349',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 2, 16)),
         Patron(patronID=22, firstName='Ron', lastName='Clark', email='ron.clark@icloud.com', phoneNum='7077774012',
-                acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 1, 4)),
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 1, 4)),
         Patron(patronID=23, firstName='Art', lastName='Rodriguez', email='art.rodriguez@mac.com', phoneNum='1658372398',
-                acctBalance=2.25, itemsRented=6, date_created=datetime(2016, 7, 31)),
+               acctBalance=2.25, itemsRented=0, date_created=datetime(2016, 7, 31)),
         Patron(patronID=24, firstName='Ken', lastName='Lee', email='ken.lee@me.com', phoneNum='0124126828',
-                acctBalance=0.00, itemsRented=1, date_created=datetime(2023, 8, 21)),
+               acctBalance=0.00, itemsRented=21, date_created=datetime(2023, 8, 21)),
     ]
 
-    # Add all to session
-    db.session.add_all(authors + item_types + items + patrons + item_authors)
-
-    # Commit the session
+    db.session.add_all(patrons)
     db.session.commit()
 
     print("Database seeded successfully!")
-
