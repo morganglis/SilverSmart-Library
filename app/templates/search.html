@@ -1,0 +1,50 @@
+{% include 'header.html' %}
+<body>
+    <h1>Search Page</h1>
+    <div>
+        <!-- Form 1 -->
+        <form action="/search" method="post"  style="margin-bottom: 20px; clear: left;">
+            <label for="patron_lastName">Enter Patron Last Name:</label>
+            <input type="text" id="lastName" name="lastName">
+            <button type="submit">Search</button>
+        </form>
+        {% if patron %}
+            <div style="float: left; margin-left: 65px; font-size: 25px;">
+                <p><strong>Patron Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
+                <p><strong>Email: </strong>{{ patron.email }}</p>
+                <p><strong>Phone Number: </strong>{{ patron.phoneNum }}</p>
+                <p><strong>Items Rented: </strong>{{ patron.itemsRented }}</p>
+            </div>
+        {% endif %}
+        <!-- Form 2 -->
+        <form action="/search" method="post" style="margin-bottom: 20px; clear: left;">
+            <label for="item_Title">Enter Item Title:</label>
+            <input type="text" id="itemTitle" name="itemTitle">
+            <button type="submit">Search</button>
+        </form>
+        {% if item %}
+            <div style="float: left; margin-left: 65px; font-size: 25px;">
+                <p><strong>Item Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
+                <p><strong>Email: </strong>{{ patron.email }}</p>
+                <p><strong>Phone Number: </strong>{{ patron.phoneNum }}</p>
+                <p><strong>Items Rented: </strong>{{ patron.itemsRented }}</p>
+            </div>
+        {% endif %}
+        <!-- Form 3 -->
+        <form action="/search" method="post" style="margin-bottom: 20px; clear: left;">
+            <label for="author_lastName">Enter Author Last Name:</label>
+            <input type="text" id="lastName" name="lastName">
+            <button type="submit">Search</button>
+        </form>
+        {% if author %}
+            <div style="float: left; margin-left: 65px; font-size: 25px;">
+                <p><strong>Patron Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
+                <p><strong>Email: </strong>{{ patron.email }}</p>
+                <p><strong>Phone Number: </strong>{{ patron.phoneNum }}</p>
+                <p><strong>Items Rented: </strong>{{ patron.itemsRented }}</p>
+            </div>
+        {% endif %}
+    </div>
+    {{ toastr.include_toastr_js() }}
+</body>
+{% include 'footer.html' %}

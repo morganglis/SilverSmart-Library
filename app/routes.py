@@ -297,6 +297,22 @@ def checkout():
                            checkout_items=session.get('checkout_items', []),
                            items=items, item_id=item_id, checkouts=checkouts, authors = authors, items_information = items_information)
 
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    patron = None
+
+    if request.method == 'POST':
+        if 'lastName' in request.form:
+            patron_lastName = request.form.get('lastName')
+            patron = Patron.query.filter_by(lastName=patron_lastName).first()
+
+            if not patron:
+                flash('No patron found with this last name.', 'error')
+            else:
+                return render_template('search.html', patron=patron)
+
+    return render_template('search.html', patron=None)
+
 def seed_database():
     # Clears out existing data and then seeds the database with data in this
 
