@@ -355,6 +355,7 @@ def checkout():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     patron = None
+    item = None
 
     if request.method == 'POST':
         if 'lastName' in request.form:
@@ -362,11 +363,20 @@ def search():
             patron = Patron.query.filter_by(lastName=patron_lastName).first()
 
             if not patron:
-                flash('No patron found with this last name.', 'error')
+                flash(f'No patron found with last name "{patron_lastName}".', 'error')
             else:
                 return render_template('search.html', patron=patron)
+        
+        if 'itemTitle' in request.form:
+            item_itemTitle = request.form.get('itemTitle')
+            item = Item.query.filter_by(itemTitle=item_itemTitle).first()
 
-    return render_template('search.html', patron=None)
+            if not item:
+                flash(f'No item found with title "{item_itemTitle}".', 'error')
+            else:
+                return render_template('search.html', item=item)
+
+    return render_template('search.html', patron=patron, item=item)
 
 def seed_database():
     # Clears out existing data and then seeds the database with data in this
