@@ -1,0 +1,94 @@
+{% include 'header.html' %}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding-top: 30px;
+    }
+    .main-content1 {
+        display: block;
+        min-height: calc(75vh - 80px);
+        text-align: center;
+    }
+    h2 {
+        background-color: rgb(203, 210, 218);
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+    }
+    form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: block;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        text-align: left;
+    }
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    /* Set a max-width for the text input fields */
+    input[type="text"]#itemTitle,
+    input[type="text"]#publishDate {
+        max-width: calc(100% - 22px); /* Adjust as needed */
+    }
+    button {
+        display: inline-block;
+        width: 100%;
+        padding: 10px;
+        background-color: rgb(203, 210, 218);
+        color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: rgb(71, 74, 74);
+    }
+</style>
+
+<div class="main-content1">
+    <h2>Add Item</h2>
+    <form>
+        <label for="itemTitle">Item Title:</label>
+        <input type="text" id="itemTitle" placeholder="Enter Title" required>
+
+        <label for="publishDate">Publish Date:</label>
+        <input type="text" id="publishDate" placeholder="Enter Publish Date" required>
+
+        <label for="itemBranch">Item Branch:</label>
+        <select id="itemBranch">
+            <option value="Branch A">Branch A</option>
+            <option value="Branch B">Branch B</option>
+            <option value="Branch C">Branch C</option>
+            <option value="Branch D">Branch D</option>
+        </select>
+
+        <label for="typeID">Type:</label>
+        <select id="typeID">
+            <option value="Book">Book</option>
+            <option value="Magazine">Magazine</option>
+            <option value="Classic Movie">Classic Movie</option>
+            <option value="New Release">New Release</option>
+            <option value="Reference">Reference</option>
+        </select>
+
+        <button type="submit">Add Item</button>
+    </form>
+</div>
+
+
+{% include 'footer.html' %}
