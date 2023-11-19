@@ -32,9 +32,23 @@ def database_summary():
                            authors=authors, checkouts=checkouts)
 
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
+@app.route('/search')
+def search():
+    patrons = Patron.query.all()
+    itemTypes = ItemType.query.all()
+    items = Item.query.all()
+    checkouts = Checkout.query.all()
+    authors = Author.query.all()
+    itemAuthors = ItemAuthors.query.all()
+    branches = Branch.query.all()
+    itemBranches = ItemBranch.query.all()
+    checkins = Checkin.query.all()
+
+    return render_template('search.html', patrons=patrons,
+                           itemTypes=itemTypes, items=items,
+                           checkouts=checkouts, authors=authors,
+                           itemAuthors=itemAuthors, branches=branches,
+                           itemBranches=itemBranches, checkins=checkins)
 
 @app.route('/add_patron')
 def add_patron():
@@ -90,6 +104,7 @@ def database_overview():
                            checkouts=checkouts, authors=authors,
                            itemAuthors=itemAuthors, branches=branches,
                            itemBranches=itemBranches, checkins=checkins)
+
 
 
 

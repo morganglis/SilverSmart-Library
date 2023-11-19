@@ -12,19 +12,24 @@
             min-height: calc(75vh - 80px);
         }
         h2 {
-            background-color: #3498db;
+            background-color: rgb(203, 210, 218);
             color: #fff;
             padding: 10px;
             text-align: center;
         }
+        .form_cont{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
         form {
+            min-width: 400px;
             max-width: 400px;
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border: 1px solid #ddd;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: block
         }
         label {
             display: block;
@@ -38,7 +43,7 @@
             border-radius: 5px;
         }
         button {
-            display: inline-block;
+            display: block;
             width: 100%;
             padding: 10px;
             background-color: rgb(203, 210, 218);
@@ -50,16 +55,80 @@
         button:hover {
             background-color: rgb(71, 74, 74);
         }
+        p {
+            font-weight: bold;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
+        .hide{
+            display: none;
+        }
     </style>
+    <script>
+        function showCheckoutTable(){
+            document.getElementById('checkOutResults').classList.remove('hide')
+        }
+    </script>
 </head>
 <body>
-<div class="search_continer">
-    <h1>Search</h1>
-    <form action="{{ url_for('search') }}" method="get">
-            <label for="itemID">Enter Book Name:</label>
-            <input type="text" id="itemID" name="itemID" required>
+<div class="main-content1">
+    <h2>Search</h2>
+    <div class="form_cont">
+        <form action="{{ url_for('database_overview') }}" method="get">
+                <label for="itemID">Enter Item ID:</label>
+                <input type="text" id="itemID" name="itemID" required>
+                <button type="submit">Search</button>
+        </form>
+        <form action="{{ url_for('search') }}" method="get">
+            <label for="authorID">Enter Author ID:</label>
+            <input type="text" id="authorID" name="authorID" required>
             <button type="submit">Search</button>
-    </form>
-{#    display information#}
+        </form>
+        <form action="{{ url_for('search') }}" method="get">
+            <label for="patronID">Enter Patron ID:</label>
+            <input type="text" id="patronID" name="patronID" required>
+            <button type="submit">Search</button>
+        </form>
+        <form action="{{ url_for('search') }}" method="get">
+            <label for="authorID">Enter Author ID:</label>
+            <input type="text" id="authorID" name="authorID" required>
+            <button type="submit">Search</button>
+        </form>
+        <form action="{{ url_for('search') }}" method="get">
+            <label for="authorID">Search for Damaged books:</label>
+            <button type="submit">Search</button>
+        </form>
+        <form action="{{ url_for('search') }}" method="post">
+            <label for="isCheckedOut">Search for Checked-out books:</label>
+            <button type="submit" onclick="showCheckoutTable()" id="isCheckedOut" name="isCheckedOut">Search</button>
+        </form>
+    </div>
+{#    checkout books#}
+    <div id="checkOutResults" class="hide">
+        <h2>Checkouts</h2>
+        {% for checkout in checkouts %}
+        <table>
+            <h2 class="table-title">Checkouts</h2>
+            <tr>
+                <th>Checkout ID</th>
+                <th>Patron ID</th>
+                <th>Item ID</th>
+                <th>Due Date</th>
+            </tr>
+            <tr>
+                <td>{{ checkout.checkoutID }}</td>
+                <td>{{ checkout.patronID }}</td>
+                <td>{{ checkout.itemID }}</td>
+                <td>{{ checkout.dueDate }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </div>
 {% include 'footer.html' %}
