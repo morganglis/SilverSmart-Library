@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 {% include 'header.html' %}
-<head>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -9,24 +8,7 @@
             padding-top: 80px;
         }
         .main-content1{
-            padding-top: 200px;
-            min-height: calc(60vh - 80px);
-        }
-        .flex_cont{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            padding-right: 700px;
-        }
-        .flex_cont > form, .flex_cont > .patron_info{
-            flex-basis: 400px;
-            flex-grow: 0;
-            flex-shrink: 0;
-        }
-        .patron_info{
-            padding-right: 200px;
-            font-size: 25px;
+            min-height: calc(75vh - 80px);
         }
         h2 {
             background-color: rgb(203, 210, 218);
@@ -36,6 +18,7 @@
         }
         form {
             max-width: 400px;
+            margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border: 1px solid #ddd;
@@ -68,7 +51,6 @@
         p {
             font-weight: bold;
             text-align: center;
-            justify-content: center;
         }
         ul {
             list-style-type: none;
@@ -78,33 +60,40 @@
             margin-bottom: 5px;
         }
     </style>
-</head>
 <body>
 <div class="main-content1">
-    <div class="flex_cont">
-        <div class="patron_info">
-            {% if patron %}
-                {% if due_date %}
-                    <p>Due Date: {{ due_date }}</p>
-                    <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
-                    <p>Patron ID: {{ patron_id }}</p>
-                    {% if days_past_due is defined %}
-                        <p>Days Past Due: {{ days_past_due }}.</p>
-                        <p>Balance Due: ${{ patronBalance }}</p>
-                    {% endif %}
+    <h2>Item Check-In</h2>
+    <form action="{{ url_for('checkin') }}" method="post">
+        <label for="itemID">Enter Item ID:</label>
+        <input type="text" id="itemID" name="itemID" required>
+
+        <label for="isDamaged">Is the item damaged?</label>
+        <select name="isDamaged" id="isDamaged">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+        </select>
+
+        <button type="submit">Check In</button>
+    </form>
+
+    {% if patron %}
+        <div>
+            <p>Patron Name: {{ patron.firstName }} {{ patron.lastName }}</p>
+            <p>Patron ID: {{ patron_id }}</p>
+            {% if due_date %}
+                <p>Due Date: {{ due_date }}</p>
+                {% if days_past_due > 0 %}
+                    <p>Days Past Due: {{ days_past_due }}. Balance Due: ${{ patronBalance }}</p>
                 {% endif %}
             {% endif %}
         </div>
-        <form action="{{ url_for('checkin') }}" method="post">
-            <label for="itemID">Enter Item ID:</label>
-            <input type="text" id="itemID" name="itemID" required>
-            <button type="submit">Check In</button>
-        </form>
-    </div>
+    {% endif %}
 </div>
+
 
 {{ toastr.include_toastr_js() }}
 
+</body>
 {% include 'footer.html' %}
 
 

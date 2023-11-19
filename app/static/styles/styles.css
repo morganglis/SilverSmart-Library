@@ -32,6 +32,10 @@ body{
     font-family: Georgia, 'Times New Roman', Times, serif;
     background-color: rgba(255, 255, 255, 0);
     text-align: center;
+    display: flex;
+    flex-direction: row; /* Ensure this is set */
+    justify-content: center;
+    align-items: center;
 }
 
 main {
@@ -40,20 +44,21 @@ main {
     margin: 20px;
 }
 
-.library_pics {
-    flex: 1;
+.library_pics, .books_in_stock {
+    flex: 1; /* Adjust this value if needed */
     display: flex;
     padding: 20px;
-    border: 1px solid black;
     margin: 10px;
     border-radius: 10px;
     flex-direction: column;
     align-items: center;
 }
 
+
+
 .library_pics img {
     margin: 10px;
-    max-width: 50%;
+    max-width: 100%;
     height: auto;
 }
 
@@ -87,20 +92,10 @@ h2 {
     transform: scale(0.9);
 }
 
-.books_in_stock {
-    display: flex;
-    flex: 1;
-    padding: 20px;
-    border: 1px solid black;
-    border-radius: 10px;
-    margin: 10px;
-    flex-direction: column;
-    align-items: center;
-}
 
 .books_in_stock img {
     margin: 10px;
-    max-width: 50%;
+    max-width: 100%;
     height: auto;
     border-radius: 10px;
 }
