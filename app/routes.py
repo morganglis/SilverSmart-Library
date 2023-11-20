@@ -422,6 +422,7 @@ def seed_database():
     db.session.query(ItemType).delete()
     db.session.query(ItemBranch).delete()
     db.session.query(Branch).delete()
+    session.pop('checkout_items', None)
 
 
 
