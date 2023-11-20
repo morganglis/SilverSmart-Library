@@ -20,9 +20,11 @@
         .form_cont{
             display: flex;
             flex-wrap: wrap;
+            justify-content: space-around;
             gap: 20px;
         }
         form {
+            flex: 1 1 400px;
             min-width: 400px;
             max-width: 400px;
             margin: 0 auto;
@@ -30,6 +32,11 @@
             background-color: #fff;
             border: 1px solid #ddd;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .bo_form{
+            width: auto;
+            padding: 10px;
+            margin: 0 auto;
         }
         label {
             display: block;
@@ -95,23 +102,17 @@
             <input type="text" id="patronID" name="patronID" required>
             <button type="submit">Search</button>
         </form>
-        <form action="{{ url_for('search') }}" method="get">
-            <label for="authorID">Enter Author ID:</label>
-            <input type="text" id="authorID" name="authorID" required>
+        <form action="{{ url_for('search') }}" method="get" class="bo_form">
+            <label for="itemCondition">Search for Damaged books:</label>
             <button type="submit">Search</button>
         </form>
-        <form action="{{ url_for('search') }}" method="get">
-            <label for="authorID">Search for Damaged books:</label>
-            <button type="submit">Search</button>
-        </form>
-        <form action="{{ url_for('search') }}" method="post">
+        <form action="{{ url_for('search') }}" method="get" class="bo_form">
             <label for="isCheckedOut">Search for Checked-out books:</label>
             <button type="submit" onclick="showCheckoutTable()" id="isCheckedOut" name="isCheckedOut">Search</button>
         </form>
     </div>
 {#    checkout books#}
     <div id="checkOutResults" class="hide">
-        <h2>Checkouts</h2>
         {% for checkout in checkouts %}
         <table>
             <h2 class="table-title">Checkouts</h2>
@@ -127,6 +128,56 @@
                 <td>{{ checkout.itemID }}</td>
                 <td>{{ checkout.dueDate }}</td>
             </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="isDamaged" class="hide">
+        <h2 class="table-title">Items</h2>
+        <table>
+            <tr>
+                <th>Item ID</th>
+                <th>Title</th>
+                <th>Publish Date</th>
+                <th>Branch</th>
+                <th>Type ID</th>
+                <th>Checked Out</th>
+                <th>Available</th>
+                <th>Condition</th>
+                <th>Secure</th>
+            </tr>
+            {% for item in items %}
+                {% if item.itemCondition == Good %}
+                    <tr>
+                        <td>{{ item.itemID }}</td>
+                        <td>{{ item.itemTitle }}</td>
+                        <td>{{ item.publishDate }}</td>
+                        <td>{{ item.itemBranch }}</td>
+                        <td>{{ item.typeID }}</td>
+                        <td>{{ item.isCheckedOut }}</td>
+                        <td>{{ item.isAvailable }}</td>
+                        <td>{{ item.itemCondition }}</td>
+                        <td>{{ item.isSecure }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    <div id="authorSearch" class="hide">
+       <h2 class="table-title">Authors</h2>
+        <table>
+            <tr>
+                <th>Author ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+            {% for author in authors %}
+                {% if author.authorID %}
+                    <tr>
+                        <td>{{ author.authorID }}</td>
+                        <td>{{ author.firstName }}</td>
+                        <td>{{ author.lastName }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
     </div>
