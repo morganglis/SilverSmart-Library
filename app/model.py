@@ -26,6 +26,7 @@ class Item(db.Model):
     itemBranch = db.Column(db.SmallInteger, db.ForeignKey('branch.branchID'))
     typeID = db.Column(db.SmallInteger, db.ForeignKey('item_type.typeID'))
     isCheckedOut = db.Column(db.Boolean, default=False, nullable=False)  # Indicates if item is checked out
+    isInCart = db.Column(db.Boolean, default=False, nullable=False)  # Indicates if item is checked out
     isAvailable = db.Column(db.Boolean, default=True, nullable=False)  # Indicates if item is available for checkout
     itemCondition = db.Column(db.String(50), default="Good")
     isSecure = db.Column(db.Boolean, default=True, nullable=False)
@@ -43,6 +44,13 @@ class Checkout(db.Model):
     patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID')) # this does not need to be primary key
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID')) # this does not need to be primary key
     dueDate = db.Column(db.Date)# this needs to be due date because you can return late.
+
+class CheckoutSaved(db.Model):
+    checkoutID = db.Column(db.Integer, primary_key=True,autoincrement = True) # this is unique for primary key
+    patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID')) # this does not need to be primary key
+    itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID')) # this does not need to be primary key
+    dueDate = db.Column(db.Date)# this needs to be due date because you can return late.
+
 
 class Author(db.Model):
     authorID = db.Column(db.Integer, primary_key=True, autoincrement = True)
@@ -67,6 +75,7 @@ class ItemBranch(db.Model):
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
     branch = db.relationship('Branch')
     item = db.relationship('Item')
+
 class Checkin(db.Model):
     patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID'))
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'))
