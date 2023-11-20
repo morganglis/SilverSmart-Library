@@ -251,6 +251,11 @@ def calculate_fees(due_date, return_date):
         return Decimal(days_past_due) * Decimal('1.00')
     return Decimal('0.00')
 
+@app.route('/add_item')
+def add_item():
+    return render_template('add_item.html')
+
+
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     if 'checkout_items' not in session:
