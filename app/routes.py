@@ -98,12 +98,14 @@ def database_overview():
     branches = Branch.query.all()
     itemBranches = ItemBranch.query.all()
     checkins = Checkin.query.all()
+    patron_id = request.form.get('patronID')
+    p = Patron.query.get(patron_id)
 
     return render_template('database_overview.html', patrons=patrons,
                            itemTypes=itemTypes, items=items,
                            checkouts=checkouts, authors=authors,
                            itemAuthors=itemAuthors, branches=branches,
-                           itemBranches=itemBranches, checkins=checkins)
+                           itemBranches=itemBranches, checkins=checkins, p=p)
 
 
 
