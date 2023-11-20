@@ -59,22 +59,32 @@
             margin-bottom: 5px;
         }
     </style>
-<h2>New Patron Registration</h2>
-<form action="{{ url_for('create_patron') }}" method="post">
+<h2>Add An Item.</h2>
+<form action="{{ url_for('create_item') }}" method="post">
 
-  <label for="firstName">First Name:</label>
-  <input type="text" id="firstName" name="firstName" required>
 
-  <label for="lastName">Last Name:</label>
-  <input type="text" id="lastName" name="lastName" required>
+    <label for="itemTitle">Item Title:</label>
+    <input type="text" name="itemTitle" placeholder="itemTitle" required>
+    <label for="authorFirstName">Author First Name:</label>
+    <input type="text" name="authorFirstName" placeholder="First Name" required>
+    <label for="authorLastName">Author Last Name:</label>
+    <input type="text" name="authorLastName" placeholder="Last Name" required>
+    <label for="publishDate">Publish Date:</label>
+    <input type="date" name="publishDate" required>
+    <label for="itemBranch">Choose a branch:</label>
+    <select name="itemBranch" id="branch">
+        {% for branch in branches %}
+            <option value="{{ branch.branchID }}">{{ branch.name }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="typeID">Type:</label>
+    <select name="typeID" id="typeID">
+        {% for type in types %}
+            <option value="{{ type.typeID }}">{{ type.typeName }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Add Item">
 
-  <label for="email">Email:</label>
-  <input type="email" id="email" name="email" required>
-
-  <label for="phoneNum">Phone Number:</label>
-  <input type="text" id="phoneNum" name="phoneNum" required>
-
-  <input type="submit" value="Add Patron">
 </form>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}

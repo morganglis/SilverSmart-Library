@@ -3,6 +3,7 @@ from app import app, db
 from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors, Branch, ItemBranch, Checkin
 from datetime import datetime, timedelta
 from decimal import Decimal
+from sqlalchemy import text
 
 from flask_toastr import Toastr
 toastr = Toastr(app)
@@ -50,6 +51,59 @@ def search():
                            itemAuthors=itemAuthors, branches=branches,
                            itemBranches=itemBranches, checkins=checkins)
 
+@app.route('/add_item')
+def add_item():
+    types = ItemType.query.all()
+    branches = Branch.query.all()
+    return render_template('add_item.html', types=types, branches=branches)
+
+@app.route('/create_item', methods=['POST'])
+def create_item():
+    # Get data from form submission
+    itemTitle = request.form['itemTitle']
+    publishDate_str = request.form['publishDate']  # Date as string
+    itemBranch = request.form['itemBranch']
+    typeID = request.form['typeID']
+    author_first_name = request.form.get('authorFirstName')
+    author_last_name = request.form.get('authorLastName')
+
+    # Parse the publishDate from string to date object
+    try:
+        publishDate = datetime.strptime(publishDate_str, '%Y-%m-%d').date()
+    except ValueError:
+        flash('Invalid publish date. Please use the format YYYY-MM-DD.', 'error')
+        return redirect(url_for('add_item'))
+
+    # Create new item
+    new_item = Item(itemTitle=itemTitle, publishDate=publishDate, itemBranch=itemBranch, typeID=typeID)
+    db.session.add(new_item)
+
+    # Check if author already exists
+    existing_author = Author.query.filter_by(firstName=author_first_name, lastName=author_last_name).first()
+    if not existing_author:
+        # Add new author if not exists
+        new_author = Author(firstName=author_first_name, lastName=author_last_name)
+        db.session.add(new_author)
+        db.session.flush()  # Flush to assign an ID to new_author
+        item_author_association = ItemAuthors(authorID=new_author.authorID, itemID=new_item.itemID)
+        db.session.add(item_author_association)
+    else:
+        item_author_association = ItemAuthors(authorID=existing_author.authorID, itemID=new_item.itemID)
+        db.session.add(item_author_association)
+
+    # Attempt to commit changes to the database
+    try:
+        db.session.commit()
+        flash('New item and author added successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'An error occurred: {e}', 'error')
+
+    return redirect(url_for('add_item'))
+
+
+
+
 @app.route('/add_patron')
 def add_patron():
     # Display a form to add a new patron
@@ -59,22 +113,20 @@ def add_patron():
 @app.route('/create_patron', methods=['POST'])
 def create_patron():
     # Get data from form submission to create a new Patron
-    patronID = request.form['patronID']
     firstName = request.form['firstName']
     lastName = request.form['lastName']
     email = request.form['email']
     phoneNum = request.form['phoneNum']
 
-    # Check if patronID already exists in the database
-    existing_patron = Patron.query.filter_by(patronID=patronID).first()
+    # Check if email already exists
+    existing_patron = Patron.query.filter_by(email=email).first()
 
-    # If a patron with this ID already exists, flash a message and redirect
     if existing_patron:
-        flash('A patron with this ID already exists. Please try a new ID', 'error')
-        return redirect(url_for('add_patron'))  # Assuming 'add_patron_form' is your route for adding patrons
+        flash('An account with this email already exists.', 'error')
+        return redirect(url_for('add_patron'))
 
     # If patronID does not exist, create a new Patron instance
-    new_patron = Patron(patronID=patronID, firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
+    new_patron = Patron(firstName=firstName, lastName=lastName, email=email, phoneNum=phoneNum,
                         acctBalance=0.00, itemsRented=0)
     db.session.add(new_patron)
 
@@ -215,6 +267,8 @@ def calculate_fees(due_date, return_date):
         days_past_due = (return_date - due_date).days
         return Decimal(days_past_due) * Decimal('1.00')
     return Decimal('0.00')
+
+
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
@@ -370,15 +424,7 @@ def checkout():
                            items=items, item_id=item_id, checkouts=checkouts, authors = authors, items_information = items_information)
 
 def seed_database():
-    # Clears out existing data and then seeds the database with data in this
-
-    # db.session.query(Checkout).delete()
-    # db.session.query(Item).delete()
-    # db.session.query(ItemType).delete()
-    # db.session.query(Patron).delete()
-    # db.session.query(ItemAuthors).delete()
-    # db.session.query(Author).delete()
-
+    # Delete records from all tables
     db.session.query(Checkin).delete()
     db.session.query(Checkout).delete()
     db.session.query(ItemAuthors).delete()
@@ -389,23 +435,25 @@ def seed_database():
     db.session.query(ItemBranch).delete()
     db.session.query(Branch).delete()
 
+
+
     # Add authors
     authors = [
-        Author(authorID=1, firstName='F. Scott', lastName='Fitzgerald'),
-        Author(authorID=2, firstName='George', lastName='Orwell'),
-        Author(authorID=3, firstName='Mary', lastName='Shelley'),
-        Author(authorID=4, firstName='Bram', lastName='Stoker'),
-        Author(authorID=5, firstName='H.P.', lastName='Lovecraft'),
-        Author(authorID=6, firstName='Stephen', lastName='King'),
-        Author(authorID=7, firstName='Jeff', lastName='Hams'),
-        Author(authorID=8, firstName='J.K.', lastName='Rowling'),
-        Author(authorID=9, firstName='J.R.R.', lastName='Tolkien'),
-        Author(authorID=10, firstName='J.D.', lastName='Salinger'),
-        Author(authorID=11, firstName='Mark', lastName='Twain'),
-        Author(authorID=12, firstName='William', lastName='Shakespeare'),
-        Author(authorID=13, firstName='Charles', lastName='Dickens'),
-        Author(authorID=14, firstName='Jules', lastName='Verne'),
-        Author(authorID=15, firstName='Agatha', lastName='Christie'),
+        Author(firstName='F. Scott', lastName='Fitzgerald'),
+        Author(firstName='George', lastName='Orwell'),
+        Author(firstName='Mary', lastName='Shelley'),
+        Author(firstName='Bram', lastName='Stoker'),
+        Author(firstName='H.P.', lastName='Lovecraft'),
+        Author(firstName='Stephen', lastName='King'),
+        Author(firstName='Jeff', lastName='Hams'),
+        Author(firstName='J.K.', lastName='Rowling'),
+        Author(firstName='J.R.R.', lastName='Tolkien'),
+        Author(firstName='J.D.', lastName='Salinger'),
+        Author(firstName='Mark', lastName='Twain'),
+        Author(firstName='William', lastName='Shakespeare'),
+        Author(firstName='Charles', lastName='Dickens'),
+        Author(firstName='Jules', lastName='Verne'),
+        Author(firstName='Agatha', lastName='Christie'),
     ]
 
     db.session.add_all(authors)
@@ -425,40 +473,105 @@ def seed_database():
 
     # Add items
     items = [
-        Item(itemID=1, itemTitle='The Great Gatsby', publishDate=datetime(1925, 4, 10), itemBranch='Main', typeID=1),
-        Item(itemID=2, itemTitle='1984', publishDate=datetime(1949, 6, 8), itemBranch='Downtown', typeID=1),
-        Item(itemID=3, itemTitle='Frankenstein', publishDate=datetime(1945, 8, 17), itemBranch='Main', typeID=1),
-        Item(itemID=4, itemTitle='Dracula', publishDate=datetime(1897, 5, 26), itemBranch='Downtown', typeID=1),
-        Item(itemID=5, itemTitle='Call of Cthulhu', publishDate=datetime(1928, 5, 1), itemBranch='Main', typeID=1),
-        Item(itemID=6, itemTitle='IT', publishDate=datetime(1986, 9, 15), itemBranch='Downtown', typeID=1),
-        Item(itemID=7, itemTitle='Ham and Eggs A SCRUM Love Story', publishDate=datetime(2020, 9, 1), itemBranch='Main', typeID=1),
-        Item(itemID=8, itemTitle='Harry Potter and the Sorcerer\'s Stone', publishDate=datetime(1997, 6, 26), itemBranch='Downtown', typeID=1),
-        Item(itemID=9, itemTitle='The Hobbit', publishDate=datetime(1937, 9, 21), itemBranch='Main', typeID=1),
-        Item(itemID=10, itemTitle='The Catcher in the Rye', publishDate=datetime(1951, 7, 16), itemBranch='Downtown', typeID=1),
-        Item(itemID=11, itemTitle='The Adventures of Tom Sawyer', publishDate=datetime(1876, 12, 1), itemBranch='Main', typeID=1),
-        Item(itemID=12, itemTitle='Romeo and Juliet', publishDate=datetime(1597, 1, 1), itemBranch='Downtown', typeID=1),
-        Item(itemID=13, itemTitle='A Tale of Two Cities', publishDate=datetime(1859, 4, 30), itemBranch='Main', typeID=1),
-        Item(itemID=14, itemTitle='Twenty Thousand Leagues Under the Sea', publishDate=datetime(1870, 1, 1), itemBranch='Downtown', typeID=1),
-        Item(itemID=15, itemTitle='Murder on the Orient Express', publishDate=datetime(1934, 2, 28), itemBranch='Main', typeID=1),
-        Item(itemID=16, itemTitle='Forbes: The Richest People in America', publishDate=datetime(2020, 10, 8), itemBranch ='Downtown', typeID=2),
-        Item(itemID=17, itemTitle='WIRED: TRON Special', publishDate=datetime(2011, 1, 16), itemBranch='Main', typeID=2),
-        Item(itemID=18, itemTitle='LIFE: Dedicated to the People Who Made It', publishDate=datetime(2000, 5, 20), itemBranch='Downtown', typeID=2),
-        Item(itemID=19, itemTitle='The Godfather', publishDate=datetime(1972, 3, 24), itemBranch='Main', typeID=3),
-        Item(itemID=20, itemTitle='Casablanca', publishDate=datetime(1942, 1, 23), itemBranch='Downtown', typeID=3),
-        Item(itemID=21, itemTitle='The Sound of Music', publishDate=datetime(1965, 4, 1), itemBranch='Main', typeID=3),
-        Item(itemID=22, itemTitle='The Matrix: Resurrections', publishDate=datetime(2021, 12, 22), itemBranch='Downtown', typeID=4),
-        Item(itemID=23, itemTitle='The Batman', publishDate=datetime(2022, 3, 4), itemBranch='Main', typeID=4),
-        Item(itemID=24, itemTitle='Mission Impossible: Dead Reckoning Part 1', publishDate=datetime(2023, 7, 11), itemBranch='Downtown', typeID=4),
-        Item(itemID=25, itemTitle='Systems Analysis and Design in a Changing World', publishDate=datetime(2016, 11, 7), itemBranch='Main', typeID=5),
-        Item(itemID=26, itemTitle='Learning Agile', publishDate=datetime(2015, 4, 2), itemBranch='Downtown', typeID=5),
-        Item(itemID=27, itemTitle='Systems Analysis & Design in an Age of Options', publishDate=datetime(2021, 1, 5), itemBranch='Main', typeID=5),
+        Item(itemTitle='The Great Gatsby', publishDate=datetime(1925, 4, 10), itemBranch= 1, typeID=1),
+        Item(itemTitle='1984', publishDate=datetime(1949, 6, 8), itemBranch= 2, typeID=1),
+        Item(itemTitle='Frankenstein', publishDate=datetime(1945, 8, 17), itemBranch= 1, typeID=1),
+        Item(itemTitle='Dracula', publishDate=datetime(1897, 5, 26), itemBranch= 2, typeID=1),
+        Item(itemTitle='Call of Cthulhu', publishDate=datetime(1928, 5, 1), itemBranch= 1, typeID=1),
+        Item(itemTitle='IT', publishDate=datetime(1986, 9, 15), itemBranch= 2, typeID=1),
+        Item(itemTitle='Ham and Eggs A SCRUM Love Story', publishDate=datetime(2020, 9, 1), itemBranch= 1, typeID=1),
+        Item(itemTitle='Harry Potter and the Sorcerer\'s Stone', publishDate=datetime(1997, 6, 26), itemBranch= 2, typeID=1),
+        Item(itemTitle='The Hobbit', publishDate=datetime(1937, 9, 21), itemBranch= 1, typeID=1),
+        Item(itemTitle='The Catcher in the Rye', publishDate=datetime(1951, 7, 16), itemBranch= 2, typeID=1),
+        Item(itemTitle='The Adventures of Tom Sawyer', publishDate=datetime(1876, 12, 1), itemBranch= 1, typeID=1),
+        Item(itemTitle='Romeo and Juliet', publishDate=datetime(1597, 1, 1), itemBranch= 2, typeID=1),
+        Item(itemTitle='A Tale of Two Cities', publishDate=datetime(1859, 4, 30), itemBranch= 1, typeID=1),
+        Item(itemTitle='Twenty Thousand Leagues Under the Sea', publishDate=datetime(1870, 1, 1), itemBranch= 2, typeID=1),
+        Item(itemTitle='Murder on the Orient Express', publishDate=datetime(1934, 2, 28), itemBranch= 1, typeID=1),
+        Item(itemTitle='Forbes: The Richest People in America', publishDate=datetime(2020, 10, 8), itemBranch= 2, typeID=2),
+        Item(itemTitle='WIRED: TRON Special', publishDate=datetime(2011, 1, 16), itemBranch= 1, typeID=2),
+        Item(itemTitle='LIFE: Dedicated to the People Who Made It', publishDate=datetime(2000, 5, 20), itemBranch= 2, typeID=2),
+        Item(itemTitle='The Godfather', publishDate=datetime(1972, 3, 24),itemBranch= 1, typeID=3),
+        Item(itemTitle='Casablanca', publishDate=datetime(1942, 1, 23), itemBranch= 2, typeID=3),
+        Item(itemTitle='The Sound of Music', publishDate=datetime(1965, 4, 1), itemBranch= 1, typeID=3),
+        Item(itemTitle='The Matrix: Resurrections', publishDate=datetime(2021, 12, 22), itemBranch= 2, typeID=4),
+        Item(itemTitle='The Batman', publishDate=datetime(2022, 3, 4), itemBranch= 1, typeID=4),
+        Item(itemTitle='Mission Impossible: Dead Reckoning Part 1', publishDate=datetime(2023, 7, 11), itemBranch= 2, typeID=4),
+        Item(itemTitle='Systems Analysis and Design in a Changing World', publishDate=datetime(2016, 11, 7), itemBranch= 1, typeID=5),
+        Item(itemTitle='Learning Agile', publishDate=datetime(2015, 4, 2), itemBranch= 2, typeID=5),
+        Item(itemTitle='Systems Analysis & Design in an Age of Options', publishDate=datetime(2021, 1, 5), itemBranch= 1, typeID=5),
     ]
 
     db.session.add_all(items)
     db.session.commit()
 
-    # Add ItemAuthors associations
-    item_authors = [
+
+
+
+    # Add patrons
+    patrons = [
+        Patron(firstName='John', lastName='Doe', email='john.doe@example.com', phoneNum='1234567890',
+               acctBalance=15.75, itemsRented=0, date_created=datetime(2013, 5, 8)),
+        Patron(firstName='Jane', lastName='Smith', email='jane.smith@example.com', phoneNum='0987654321',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2015, 2, 24)),
+        Patron(firstName='Jim', lastName='Johns', email='jim.johns@aol.com', phoneNum='9192012654',
+               acctBalance=8.00, itemsRented=0, date_created=datetime(2020, 10, 1)),
+        Patron(firstName='Don', lastName='Johnson', email='d.johnson@yahoo.com', phoneNum='9192022654',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2019, 9, 11)),
+        Patron(firstName='Bob', lastName='Jones', email='bob.jones@hotmail.com', phoneNum='9192032654',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 12, 30)),
+        Patron(firstName='Sally', lastName='Williams', email='sally.williams@outlook.com',
+               phoneNum='6192032654', acctBalance=20.25, itemsRented=0, date_created=datetime(2012, 7, 2)),
+        Patron(firstName='Mary', lastName='Brown', email='mary.brown@live.com', phoneNum='2052032654',
+               acctBalance=1.50, itemsRented=0, date_created=datetime(2018, 3, 14)),
+        Patron(firstName='Sue', lastName='Davis', email='sue.davis@gmail.com', phoneNum='8002032654',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 8, 23)),
+        Patron(firstName='Mike', lastName='Miller', email='mike.miller@netscape.net', phoneNum='6570583230',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2021, 10, 6)),
+        Patron(firstName='Bill', lastName='Wilson', email='bill.wilson@icnet.net', phoneNum='0857651273',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2014, 11, 13)),
+        Patron(firstName='Tom', lastName='Moore', email='tom.more@icloud.com', phoneNum='9865390253',
+               acctBalance=12.50, itemsRented=0, date_created=datetime(2012, 6, 10)),
+        Patron(firstName='Tim', lastName='Taylor', email='tim.taylor@mac.com', phoneNum='1237534087',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2017, 4, 22)),
+        Patron(firstName='Sam', lastName='Thomas', email='sam.thomas@me.com', phoneNum='4207203600',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2022, 5, 3)),
+        Patron(firstName='Fred', lastName='Jackson', email='fred.jackson@aol.com', phoneNum='6097203600',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2015, 6, 27)),
+        Patron(firstName='Joe', lastName='White', email='joe.white@yahoo.com', phoneNum='2345491746',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2022, 7, 20)),
+        Patron(firstName='Dave', lastName='Harris', email='dave.harris@hotmail.com', phoneNum='1560785328',
+               acctBalance=35.00, itemsRented=0, date_created=datetime(2014, 12, 25)),
+        Patron(firstName='Ed', lastName='Martin', email='ed.martin@outlook.com', phoneNum='9998652456',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2019, 5, 16)),
+        Patron(firstName='Dan', lastName='Thompson', email='dan.thompson@live.com', phoneNum='7652839434',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2018, 8, 29)),
+        Patron(firstName='Frank', lastName='Garcia', email='frank.garcia@gmail.com', phoneNum='8080064682',
+               acctBalance=2.00, itemsRented=0, date_created=datetime(2017, 12, 8)),
+        Patron(firstName='Carl', lastName='Martinez', email='carl.martinez@netscape.net',
+               phoneNum='5211750349', acctBalance=0.00, itemsRented=0, date_created=datetime(2020, 9, 28)),
+        Patron(firstName='Kim', lastName='Robinson', email='kim.robinson@icnet.net', phoneNum='5031750349',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 2, 16)),
+        Patron(firstName='Ron', lastName='Clark', email='ron.clark@icloud.com', phoneNum='7077774012',
+               acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 1, 4)),
+        Patron(firstName='Art', lastName='Rodriguez', email='art.rodriguez@mac.com', phoneNum='1658372398',
+               acctBalance=2.25, itemsRented=0, date_created=datetime(2016, 7, 31)),
+        Patron(firstName='Ken', lastName='Lee', email='ken.lee@me.com', phoneNum='0124126828',
+               acctBalance=0.00, itemsRented=21, date_created=datetime(2023, 8, 21)),
+    ]
+
+    db.session.add_all(patrons)
+    db.session.commit()
+
+    # Add branches
+    branches = [
+        Branch(branchID=1, name='Main', address='123 Main St.'),
+        Branch(branchID=2, name='Downtown', address='456 Downtown Ave.'),
+    ]
+    db.session.add_all(branches)
+    db.session.commit()
+
+    item_authors =[
         ItemAuthors(authorID=1, itemID=1),
         ItemAuthors(authorID=2, itemID=2),
         ItemAuthors(authorID=3, itemID=3),
@@ -474,64 +587,21 @@ def seed_database():
         ItemAuthors(authorID=13, itemID=13),
         ItemAuthors(authorID=14, itemID=14),
         ItemAuthors(authorID=15, itemID=15),
+        ItemAuthors(authorID=6, itemID=16),
+        ItemAuthors(authorID=7, itemID=17),
+        ItemAuthors(authorID=8, itemID=18),
+        ItemAuthors(authorID=9, itemID=19),
+        ItemAuthors(authorID=10, itemID=20),
+        ItemAuthors(authorID=1, itemID=21),
+        ItemAuthors(authorID=2, itemID=22),
+        ItemAuthors(authorID=3, itemID=23),
+        ItemAuthors(authorID=4, itemID=24),
+        ItemAuthors(authorID=5, itemID=25),
+        ItemAuthors(authorID=6, itemID=26),
+
     ]
 
     db.session.add_all(item_authors)
-    db.session.commit()
-
-    # Add patrons
-    patrons = [
-        Patron(patronID=1, firstName='John', lastName='Doe', email='john.doe@example.com', phoneNum='1234567890',
-               acctBalance=15.75, itemsRented=0, date_created=datetime(2013, 5, 8)),
-        Patron(patronID=2, firstName='Jane', lastName='Smith', email='jane.smith@example.com', phoneNum='0987654321',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2015, 2, 24)),
-        Patron(patronID=3, firstName='Jim', lastName='Johns', email='jim.johns@aol.com', phoneNum='9192012654',
-               acctBalance=8.00, itemsRented=0, date_created=datetime(2020, 10, 1)),
-        Patron(patronID=4, firstName='Don', lastName='Johnson', email='d.johnson@yahoo.com', phoneNum='9192022654',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2019, 9, 11)),
-        Patron(patronID=5, firstName='Bob', lastName='Jones', email='bob.jones@hotmail.com', phoneNum='9192032654',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 12, 30)),
-        Patron(patronID=6, firstName='Sally', lastName='Williams', email='sally.williams@outlook.com',
-               phoneNum='6192032654', acctBalance=20.25, itemsRented=0, date_created=datetime(2012, 7, 2)),
-        Patron(patronID=7, firstName='Mary', lastName='Brown', email='mary.brown@live.com', phoneNum='2052032654',
-               acctBalance=1.50, itemsRented=0, date_created=datetime(2018, 3, 14)),
-        Patron(patronID=8, firstName='Sue', lastName='Davis', email='sue.davis@gmail.com', phoneNum='8002032654',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 8, 23)),
-        Patron(patronID=9, firstName='Mike', lastName='Miller', email='mike.miller@netscape.net', phoneNum='6570583230',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2021, 10, 6)),
-        Patron(patronID=10, firstName='Bill', lastName='Wilson', email='bill.wilson@icnet.net', phoneNum='0857651273',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2014, 11, 13)),
-        Patron(patronID=11, firstName='Tom', lastName='Moore', email='tom.more@icloud.com', phoneNum='9865390253',
-               acctBalance=12.50, itemsRented=0, date_created=datetime(2012, 6, 10)),
-        Patron(patronID=12, firstName='Tim', lastName='Taylor', email='tim.taylor@mac.com', phoneNum='1237534087',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2017, 4, 22)),
-        Patron(patronID=13, firstName='Sam', lastName='Thomas', email='sam.thomas@me.com', phoneNum='4207203600',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2022, 5, 3)),
-        Patron(patronID=14, firstName='Fred', lastName='Jackson', email='fred.jackson@aol.com', phoneNum='6097203600',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2015, 6, 27)),
-        Patron(patronID=15, firstName='Joe', lastName='White', email='joe.white@yahoo.com', phoneNum='2345491746',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2022, 7, 20)),
-        Patron(patronID=16, firstName='Dave', lastName='Harris', email='dave.harris@hotmail.com', phoneNum='1560785328',
-               acctBalance=35.00, itemsRented=0, date_created=datetime(2014, 12, 25)),
-        Patron(patronID=17, firstName='Ed', lastName='Martin', email='ed.martin@outlook.com', phoneNum='9998652456',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2019, 5, 16)),
-        Patron(patronID=18, firstName='Dan', lastName='Thompson', email='dan.thompson@live.com', phoneNum='7652839434',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2018, 8, 29)),
-        Patron(patronID=19, firstName='Frank', lastName='Garcia', email='frank.garcia@gmail.com', phoneNum='8080064682',
-               acctBalance=2.00, itemsRented=0, date_created=datetime(2017, 12, 8)),
-        Patron(patronID=20, firstName='Carl', lastName='Martinez', email='carl.martinez@netscape.net',
-               phoneNum='5211750349', acctBalance=0.00, itemsRented=0, date_created=datetime(2020, 9, 28)),
-        Patron(patronID=21, firstName='Kim', lastName='Robinson', email='kim.robinson@icnet.net', phoneNum='5031750349',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2016, 2, 16)),
-        Patron(patronID=22, firstName='Ron', lastName='Clark', email='ron.clark@icloud.com', phoneNum='7077774012',
-               acctBalance=0.00, itemsRented=0, date_created=datetime(2013, 1, 4)),
-        Patron(patronID=23, firstName='Art', lastName='Rodriguez', email='art.rodriguez@mac.com', phoneNum='1658372398',
-               acctBalance=2.25, itemsRented=0, date_created=datetime(2016, 7, 31)),
-        Patron(patronID=24, firstName='Ken', lastName='Lee', email='ken.lee@me.com', phoneNum='0124126828',
-               acctBalance=0.00, itemsRented=21, date_created=datetime(2023, 8, 21)),
-    ]
-
-    db.session.add_all(patrons)
     db.session.commit()
 
     print("Database seeded successfully!")
