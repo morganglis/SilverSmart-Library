@@ -3,7 +3,7 @@ from datetime import datetime
 
 # added Ian's database code implementing the ERD.
 class Patron(db.Model):
-    patronID = db.Column(db.SmallInteger, primary_key=True)
+    patronID = db.Column(db.Integer, primary_key=True,autoincrement = True)
     firstName = db.Column(db.String(20))
     lastName = db.Column(db.String(20))
     email = db.Column(db.String(30))
@@ -20,10 +20,10 @@ class ItemType(db.Model):
     items = db.relationship('Item', backref='item_type', lazy='dynamic')
 
 class Item(db.Model):
-    itemID = db.Column(db.SmallInteger, primary_key=True)
+    itemID = db.Column(db.Integer, primary_key=True, autoincrement = True)
     itemTitle = db.Column(db.String(50))
     publishDate = db.Column(db.Date)
-    itemBranch = db.Column(db.String(50))
+    itemBranch = db.Column(db.SmallInteger, db.ForeignKey('branch.branchID'))
     typeID = db.Column(db.SmallInteger, db.ForeignKey('item_type.typeID'))
     isCheckedOut = db.Column(db.Boolean, default=False, nullable=False)  # Indicates if item is checked out
     isAvailable = db.Column(db.Boolean, default=True, nullable=False)  # Indicates if item is available for checkout
@@ -34,8 +34,10 @@ class Item(db.Model):
     # Relationships
     checkouts = db.relationship('Checkout', backref='item', lazy='dynamic')
     authors = db.relationship('Author', secondary='item_authors', backref=db.backref('items', lazy='dynamic'))
+    branches = db.relationship('Branch', secondary='item_branch', back_populates='items')
+    item_branch_entries = db.relationship('ItemBranch')
 
-    
+
 class Checkout(db.Model):
     checkoutID = db.Column(db.Integer, primary_key=True,autoincrement = True) # this is unique for primary key
     patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID')) # this does not need to be primary key
@@ -43,7 +45,7 @@ class Checkout(db.Model):
     dueDate = db.Column(db.Date)# this needs to be due date because you can return late.
 
 class Author(db.Model):
-    authorID = db.Column(db.SmallInteger, primary_key=True)
+    authorID = db.Column(db.Integer, primary_key=True, autoincrement = True)
     firstName = db.Column(db.String(20))
     lastName = db.Column(db.String(20))
 
@@ -56,12 +58,15 @@ class Branch(db.Model):
     branchID = db.Column(db.SmallInteger, primary_key=True)
     name = db.Column(db.String(50))
     address = db.Column(db.String(255))
-    item_branches = db.relationship('ItemBranch', backref='branch', lazy='dynamic')
+    items = db.relationship('Item', secondary='item_branch', back_populates='branches')
+    item_branches = db.relationship('ItemBranch', backref='branch_item_branches', lazy='dynamic')
+
 
 class ItemBranch(db.Model):
     branchID = db.Column(db.SmallInteger, db.ForeignKey('branch.branchID'), primary_key=True)
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'), primary_key=True)
-
+    branch = db.relationship('Branch')
+    item = db.relationship('Item')
 class Checkin(db.Model):
     patronID = db.Column(db.SmallInteger, db.ForeignKey('patron.patronID'))
     itemID = db.Column(db.SmallInteger, db.ForeignKey('item.itemID'))

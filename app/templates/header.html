@@ -22,11 +22,14 @@
         <div class="tool_bar">
             <nav>
                 <ul>
-                    <button> <a href="{{ url_for('library') }}">Home</a></button>
-                    <button> <a href="{{ url_for('checkout') }}">Check-Out</a></button>
-                    <button> <a href="{{ url_for('checkin') }}">Check-In</a> </button>
-                    <button> <a href="{{ url_for('search') }}">Search</a> </button>
-                    <button> <a href="{{ url_for('about') }}">About</a></button>
+                    <li><a class="nav-button" href="{{ url_for('library') }}">Home</a></li>
+                    <li><a class="nav-button" href="{{ url_for('search') }}">Search</a></li>
+                    <li><a class="nav-button" href="{{ url_for('checkout') }}">Check-Out</a></li>
+                    <li><a class="nav-button" href="{{ url_for('checkin') }}">Check-In</a></li>
+                    <li><a class="nav-button" href="{{ url_for('add_item') }}">New Item</a></li>
+                    <li><a class="nav-button" href="{{ url_for('add_patron') }}">New Patron</a></li>
+                    <li><a class="nav-button" href="{{ url_for('database_overview') }}">DB Summary</a></li>
+
                 </ul>
             </nav>
         </div>
