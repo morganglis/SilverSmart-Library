@@ -94,13 +94,17 @@
         <!-- Form 3 -->
         <form action="/search" method="post" style="margin-bottom: 20px; clear: left;">
             <label for="author_lastName">Enter Author Last Name:</label>
-            <input type="text" id="lastName" name="lastName">
+            <input type="text" id="authorLastName" name="authorLastName">
             <button type="submit">Search</button>
         </form>
         {% if author %}
             <div style="float: left; margin-left: 65px; font-size: 25px;">
                 <p><strong>Author Name: </strong>{{ author.firstName }} {{ author.lastName }}</p>
-                <p><strong>Authored Items: </strong>{{ patron.email }}</p>
+                <p><strong>Authored Items: </strong>
+                    {% for item in author.items %}
+                        {{ item.title }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
             </div>
         {% endif %}
     </div>

@@ -8,7 +8,7 @@ from sqlalchemy import text
 from flask_toastr import Toastr
 toastr = Toastr(app)
 
-app.config['TOASTR_POSITION_CLASS'] = 'toast-top-center'
+app.config['TOASTR_POSITION_CLASS'] = 'toast-bottom-right'
 
 @app.route('/seed_db', methods=['POST'])
 def seed_db_route():
@@ -410,6 +410,7 @@ def checkout():
 def search():
     patron = None
     item = None
+    author = None
 
     if request.method == 'POST':
         if 'lastName' in request.form:
@@ -429,8 +430,17 @@ def search():
                 flash(f'No item found with title "{item_itemTitle}".', 'error')
             else:
                 return render_template('search.html', item=item)
+        
+        if 'authorLastName' in request.form:
+            author_lastName = request.form.get('authorLastName')
+            author = Author.query.filter_by(lastName=author_lastName).first()
 
-    return render_template('search.html', patron=patron, item=item)
+            if not author:
+                flash(f'No author found with name "{author_lastName}".', 'error')
+            else:
+                return render_template('search.html', author=author)
+
+    return render_template('search.html', patron=patron, item=item, author=author)
 
 def seed_database():
     # Delete records from all tables
