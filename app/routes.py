@@ -437,11 +437,6 @@ def search():
             author_lastName = request.form.get('authorLastName')
             author = Author.query.filter_by(lastName=author_lastName).first()
 
-            if author:
-                item_author_records = ItemAuthors.query.filter_by(authorID=author.authorID).all()
-                item_ids = [record.itemID for record in item_author_records]
-                authored_books = Item.query.filter(Item.itemID.in_(item_ids)).all()
-
             if not author:
                 flash(f'No author found with name "{author_lastName}".', 'error')
             else:
