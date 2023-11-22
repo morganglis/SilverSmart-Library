@@ -1,113 +1,207 @@
+<!DOCTYPE html>
 {% include 'header.html' %}
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f5f5f5;
-        margin: 0;
-        padding-top: 80px;
-    }
-    .main-content1{
-        min-height: calc(75vh - 80px);
-    }
-    h2 {
-        background-color: rgb(203, 210, 218);
-        color: #fff;
-        padding: 10px;
-        text-align: center;
-    }
-    form {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    label {
-        display: block;
-        margin-bottom: 5px;
-    }
-    input[type="text"], input[type="number"] {
-        width: 95%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-    button {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        background-color: rgb(203, 210, 218);
-        color: black;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    button:hover {
-        background-color: rgb(71, 74, 74);
-    }
-    p {
-        font-weight: bold;
-        text-align: center;
-    }
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-    ul li {
-        margin-bottom: 5px;
-    }
-</style>
+<head>
+    <style>
+        body {
+           font-family: Arial, sans-serif;
+           background-color: #f5f5f5;
+           margin: 0;
+           padding-top: 10px;
+       }
+       .main-content1{
+           min-height: calc(75vh - 80px);
+           display: flex;
+           flex-wrap: wrap;
+           justify-content: space-around;
+           gap: 10px;
+       }
+       h2 {
+           background-color: rgb(203, 210, 218);
+           color: #fff;
+           padding: 10px;
+           text-align: center;
+           width: 100%;
+           box-sizing: border-box;
+       }
+       .form_cont {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        form {
+            flex: 1 1 400px;
+            min-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+       .bo_form{
+           width: auto;
+           padding: 10px;
+           margin: 0 auto;
+       }
+       label {
+           display: block;
+           margin-bottom: 5px;
+       }
+       input[type="text"], input[type="number"] {
+           width: 95%;
+           padding: 10px;
+           margin-bottom: 10px;
+           border: 1px solid #ccc;
+           border-radius: 5px;
+       }
+       button {
+           display: block;
+           width: 100%;
+           padding: 10px;
+           background-color: rgb(203, 210, 218);
+           color: black;
+           border: none;
+           border-radius: 5px;
+           cursor: pointer;
+       }
+       button:hover {
+           background-color: rgb(71, 74, 74);
+       }
+       p {
+           font-weight: bold;
+           text-align: center;
+       }
+       ul {
+           list-style-type: none;
+           padding: 0;
+       }
+       ul li {
+           margin-bottom: 5px;
+       }
+       td {
+            text-align: center;
+        }
+        th {
+            text-align: center;
+        }
+   </style>
+</head>
 <body>
-    <h2>Search Page</h2>
-    <div>
-        <!-- Form 1 -->
-        <form action="/search" method="post"  style="margin-bottom: 20px; clear: left;">
+<div class="main-content1">
+    <h2>Search</h2>
+    <div class="form_cont">
+        <form action="/search" method="post">
             <label for="patron_lastName">Enter Patron Last Name:</label>
             <input type="text" id="lastName" name="lastName">
             <button type="submit">Search</button>
+            {% if patron %}
+                <div class="table-container">
+                    <table style="font-size: 16px; border-spacing: 10px; border-collapse: separate;">
+                        <tr>
+                            <th>Patron Name</th>
+                            <th>Email</th>
+                            <th>Items Rented</th>
+                            <th>Account Balance</th>
+                        </tr>
+                        <tr>
+                            <td>{{ patron.firstName }} {{ patron.lastName }}</td>
+                            <td>{{ patron.email }}</td>
+                            <td>{{ patron.itemsRented }}</td>
+                            <td>{{ patron.acctBalance }}</td>
+                        </tr>
+                    </table>
+                </div>
+            {% endif %}
         </form>
-        {% if patron %}
-            <div style="float: left; margin-left: 65px; font-size: 25px;">
-                <p><strong>Patron Name: </strong>{{ patron.firstName }} {{ patron.lastName }}</p>
-                <p><strong>Email: </strong>{{ patron.email }}</p>
-                <p><strong>Phone Number: </strong>{{ patron.phoneNum }}</p>
-                <p><strong>Items Rented: </strong>{{ patron.itemsRented }}</p>
-                <p><strong>Account Balance: </strong>{{ patron.acctBalance }}</p>
-            </div>
-        {% endif %}
-        <!-- Form 2 -->
-        <form action="/search" method="post" style="margin-bottom: 20px; clear: left;">
-            <label for="item_Title">Enter Item Title:</label>
+        <form action="/search" method="post">
+            <label for="itemTitle">Enter Item Title:</label>
             <input type="text" id="itemTitle" name="itemTitle">
             <button type="submit">Search</button>
+            {% if item %}
+                <div class="table-container">
+                    <table style="font-size: 16px; border-spacing: 10px; border-collapse: separate;">
+                        <tr>
+                            <th style="padding: 5px;">Item Title</th>
+                            <th style="padding: 5px;">Item Branch</th>
+                            <th style="padding: 10px;">Item Availability</th>
+                            <th style="padding: 10px;">Item Condition</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px;">{{ item.itemTitle }}</td>
+                            <td style="padding: 5px;">{{ item.itemBranch }}</td>
+                            <td style="padding: 5px;">{{ item.isAvailable }}</td>
+                            <td style="padding: 5px;">{{ item.itemCondition }}</td>
+                        </tr>
+                    </table>
+                </div>
+            {% endif %}
         </form>
-        {% if item %}
-            <div style="float: left; margin-left: 65px; font-size: 25px;">
-                <p><strong>Item Title: </strong>{{ item.itemTitle }}</p>
-                <p><strong>Item Branch: </strong>{{ item.itemBranch }}</p>
-                <p><strong>Item Availability: </strong>{{ item.isAvailable }}</p>
-                <p><strong>Items Condition: </strong>{{ item.itemCondition }}</p>
-            </div>
-        {% endif %}
-        <!-- Form 3 -->
-        <form action="/search" method="post" style="margin-bottom: 20px; clear: left;">
+        <form action="/search" method="post">
             <label for="author_lastName">Enter Author Last Name:</label>
             <input type="text" id="authorLastName" name="authorLastName">
             <button type="submit">Search</button>
+            {% if author %}
+                <div class="table-container">
+                    <table style="font-size: 16px; border-spacing: 10px; border-collapse: separate;">
+                        <tr>
+                            <th style="padding: 5px;">First Name</th>
+                            <th style="padding: 5px;">Last Name</th>
+                            <th style="padding: 5px;">Authored Books</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px;">{{ author.firstName }}</td>
+                            <td style="padding: 5px;">{{ author.lastName }}</td>
+                            {% if items %}
+                                {% for item in items %}
+                                    <td style="padding: 5px;">{{ item.itemTitle }}</td>
+                                {% endfor %}
+                            {% endif %}
+                        </tr>
+                    </table>
+                </div>
+            {% endif %}
         </form>
-        {% if author %}
-            <div style="float: left; margin-left: 65px; font-size: 25px;">
-                <p><strong>Author Name: </strong>{{ author.firstName }} {{ author.lastName }}</p>
-                <p><strong>Authored Items: </strong>
-                    {% for item in author.items %}
-                        {{ item.title }}{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-            </div>
-        {% endif %}
-    </div>
+        <form action="/search" method="get" class="bo_form">
+            <button type="submit" name="searchType" value="damagedBooks">Show Damaged Books</button>
+            {% if damaged_books %}
+                <div class="table-container">
+                    <table style="font-size: 16px; border-spacing: 10px; border-collapse: separate;">
+                        <tr>
+                            <th>Item Title</th>
+                            <th>Item Branch</th>
+                        </tr>
+                        {% for damaged_item in damaged_books %}
+                            <tr>
+                                <td>{{ damaged_item.itemTitle }}</td>
+                                <td>{{ damaged_item.itemBranch }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endif %}
+        </form>
+        <form action="/search" method="get" class="bo_form">
+            <button type="submit" name="searchType" value="checkedOut">Show Checked Out Books</button>
+            {% if checked_out %}
+                <div class="table-container">
+                    <table style="font-size: 16px; border-spacing: 10px; border-collapse: separate;">
+                        <tr>
+                            <th>Item Title</th>
+                            <th>Item Branch</th>
+                        </tr>
+                        {% for checked_out_item in checked_out %}
+                            <tr>
+                                <td>{{ checked_out_item.itemTitle }}</td>
+                                <td>{{ checked_out_item.itemBranch }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endif %}
+        </form>
     {{ toastr.include_toastr_js() }}
 </body>
+<script>
+</script>
 {% include 'footer.html' %}

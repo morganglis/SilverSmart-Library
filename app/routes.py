@@ -32,11 +32,6 @@ def database_summary():
     return render_template('database_summary.html', patrons=patrons, item_types=item_types, items=items,
                            authors=authors, checkouts=checkouts)
 
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
 @app.route('/add_item')
 def add_item():
     types = ItemType.query.all()
@@ -136,12 +131,15 @@ def database_overview():
     branches = Branch.query.all()
     itemBranches = ItemBranch.query.all()
     checkins = Checkin.query.all()
+    patron_id = request.form.get('patronID')
+    p = Patron.query.get(patron_id)
 
     return render_template('database_overview.html', patrons=patrons,
                            itemTypes=itemTypes, items=items,
                            checkouts=checkouts, authors=authors,
                            itemAuthors=itemAuthors, branches=branches,
-                           itemBranches=itemBranches, checkins=checkins)
+                           itemBranches=itemBranches, checkins=checkins, p=p)
+
 
 
 
@@ -411,6 +409,10 @@ def search():
     patron = None
     item = None
     author = None
+    items = Item.query.all()
+    damaged_books = []
+    checked_out = []
+    authored_books = []
 
     if request.method == 'POST':
         if 'lastName' in request.form:
@@ -430,17 +432,35 @@ def search():
                 flash(f'No item found with title "{item_itemTitle}".', 'error')
             else:
                 return render_template('search.html', item=item)
-        
+
         if 'authorLastName' in request.form:
             author_lastName = request.form.get('authorLastName')
             author = Author.query.filter_by(lastName=author_lastName).first()
 
+            if author:
+                item_author_records = ItemAuthors.query.filter_by(authorID=author.authorID).all()
+                item_ids = [record.itemID for record in item_author_records]
+                authored_books = Item.query.filter(Item.itemID.in_(item_ids)).all()
+
             if not author:
                 flash(f'No author found with name "{author_lastName}".', 'error')
             else:
-                return render_template('search.html', author=author)
+                return render_template('search.html', author=author, authored_books=authored_books)
 
-    return render_template('search.html', patron=patron, item=item, author=author)
+    if request.method == 'GET':
+        search_type = request.args.get('searchType')
+
+        if search_type == 'damagedBooks':
+            damaged_books = [item for item in items if item.itemCondition == "Damaged"]
+
+        elif search_type == 'checkedOut':
+            checked_out = [item for item in items if item.isCheckedOut]
+
+        if not search_type:
+            damaged_books = []
+            checked_out = []
+
+    return render_template('search.html', patron=patron, item=item, author=author, damaged_books=damaged_books, checked_out=checked_out, authored_books=authored_books)
 
 def seed_database():
     # Delete records from all tables
