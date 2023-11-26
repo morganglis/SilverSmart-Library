@@ -481,7 +481,7 @@ def seed_database():
         elif db_dialect == 'postgresql':
             # List of sequence names for PostgreSQL
             postgres_sequences = [
-                'author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
+                'Author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
                 'checkout_checkoutID_seq', 'item_type_typeID_seq', 'branch_branchID_seq',
                 'item_branch_branchID_itemID_seq', 'checkin_checkinID_seq'
             ]
