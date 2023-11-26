@@ -474,16 +474,16 @@ def seed_database():
     with db.engine.connect() as connection:
         if db_dialect == 'sqlite':
             # List of table names with autoincrement fields for SQLite
-            sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'item_branch', 'checkin']
+            sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'checkin']
             for table in sqlite_tables:
                 connection.execute(text(f"DELETE FROM sqlite_sequence WHERE name='{table}'"))
 
         elif db_dialect == 'postgresql':
             # List of sequence names for PostgreSQL
             postgres_sequences = [
-                'Author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
+                'author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
                 'checkout_checkoutID_seq', 'item_type_typeID_seq', 'branch_branchID_seq',
-                'item_branch_branchID_itemID_seq', 'checkin_checkinID_seq'
+                'checkin_checkinID_seq'
             ]
             for seq in postgres_sequences:
                 connection.execute(text(f"ALTER SEQUENCE {seq} RESTART WITH 1"))
