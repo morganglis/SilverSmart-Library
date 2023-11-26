@@ -199,3 +199,8 @@ input {
         page-break-inside: avoid;
     }
 }
+
+.foot_head_fixer{
+    padding-top: 80px;
+    min-height: calc(73vh - 80px);
+}
