@@ -473,26 +473,25 @@ def seed_database():
     db_dialect = db.engine.dialect.name
 
     with db.engine.connect() as connection:
+        trans = connection.begin()  # Start a new transaction
+
         if db_dialect == 'sqlite':
-            # List of table names with autoincrement fields for SQLite
             sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'checkin']
             for table in sqlite_tables:
                 connection.execute(text(f"DELETE FROM sqlite_sequence WHERE name='{table}'"))
+                print(f"SQLite sequence for table '{table}' reset")
 
         elif db_dialect == 'postgresql':
-            # List of sequence names for PostgreSQL
             postgres_sequences = [
-                '"author_authorID_seq"',  # Using double quotes for case sensitivity
-                '"patron_patronID_seq"',
-                '"item_itemID_seq"',
-                '"checkout_checkoutID_seq"',
-                '"item_type_typeID_seq"',
-                '"branch_branchID_seq"',
+                '"author_authorID_seq"', '"patron_patronID_seq"', '"item_itemID_seq"',
+                '"checkout_checkoutID_seq"', '"item_type_typeID_seq"', '"branch_branchID_seq"',
                 '"checkin_checkinID_seq"'
             ]
             for seq in postgres_sequences:
                 connection.execute(text(f"ALTER SEQUENCE {seq} RESTART WITH 1"))
-                print (f"reset sequence {seq}")
+                print(f"PostgreSQL sequence {seq} reset")
+
+        trans.commit()  # Commit the transaction
 
     # Add authors
     authors = [
