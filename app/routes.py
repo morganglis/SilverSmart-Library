@@ -201,20 +201,23 @@ def checkin():
                 item.itemCondition = "Damaged"
                 item.isAvailable = False
                 item.isCheckedOut = False
+                item.cartStatus = "Damaged"
                 if patron.itemsRented > 0:
                     patron.itemsRented -= 1
                 flash(f'Place {item_id} in damaged bin.', 'warning')
-            elif item.itemBranch != 'Main':
+            elif item.itemBranch == 2:
                 item.isCheckedOut = False # item is checked in
                 item.isAvailable = False # item is not available because it is in transit
                 item.inTransit = True  # Show that the item is in cart for transit
+                item.cartStatus = "DowntownCart"
                 if patron.itemsRented > 0:
                     patron.itemsRented -= 1
-                flash(f'Item {item_id} should be placed in {item.itemBranch} cart.', 'info')
+                flash(f'Item {item_id} should be placed in downtown cart.', 'info')
             else:
                 item.isCheckedOut = False
                 item.isAvailable = True
                 item.isSecure = True
+                item.cartStatus = "ShelvingCart"
                 if patron.itemsRented > 0:
                     patron.itemsRented -= 1
                 flash(f'Item {item_id} should be placed in shelving cart.', 'info')
@@ -438,8 +441,10 @@ def search():
             author = Author.query.filter_by(lastName=author_lastName).first()
 
             if not author:
-                flash(f'No author found with name "{author_lastName}".', 'error')
+                flash(f'No author found with last name "{author_lastName}".', 'error')
             else:
+                # Use the relationship to get items authored by the found author
+                authored_books = author.items.all()
                 return render_template('search.html', author=author, authored_books=authored_books)
 
     if request.method == 'GET':
@@ -456,6 +461,38 @@ def search():
             checked_out = []
 
     return render_template('search.html', patron=patron, item=item, author=author, damaged_books=damaged_books, checked_out=checked_out, authored_books=authored_books)
+
+@app.route('/shelving', methods=['GET', 'POST'])
+def shelving():
+    if request.method == 'POST':
+        # Handle the update logic for Shelving Cart items
+        shelving_item_ids = request.form.getlist('shelving_item_ids')
+        for item_id in shelving_item_ids:
+            update_item_status(item_id)
+
+        # Handle the update logic for Downtown Cart items
+        downtown_item_ids = request.form.getlist('downtown_item_ids')
+        for item_id in downtown_item_ids:
+            update_item_status(item_id)
+
+        db.session.commit()
+        flash('Items updated successfully')
+
+    # Fetch items for display
+    shelving_cart_items = Item.query.filter_by(cartStatus="ShelvingCart").all()
+    downtown_cart_items = Item.query.filter_by(cartStatus="DowntownCart").all()
+
+    return render_template('shelving.html',
+                           shelving_cart_items=shelving_cart_items,
+                           downtown_cart_items=downtown_cart_items)
+
+def update_item_status(item_id):
+    item = Item.query.get(item_id)
+    if item:
+        item.cartStatus = "None"
+        item.isSecure = True
+        item.inTransit = False
+        item.isAvailable = True
 
 def seed_database():
     # Delete records from all tables
@@ -475,13 +512,13 @@ def seed_database():
     with db.engine.connect() as connection:
         trans = connection.begin()  # Start a new transaction
 
-        if db_dialect == 'sqlite':
-            sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'checkin']
-            for table in sqlite_tables:
-                connection.execute(text(f"DELETE FROM sqlite_sequence WHERE name='{table}'"))
-                print(f"SQLite sequence for table '{table}' reset")
+        # if db_dialect == 'sqlite':
+        #     sqlite_tables = ['Author', 'Patron', 'Item', 'Checkout', 'Item_type', 'Branch', 'Checkin']
+        #     for table in sqlite_tables:
+        #         connection.execute(text(f"DELETE FROM sqlite_sequence WHERE name='{table}'"))
+        #         print(f"SQLite sequence for table '{table}' reset")
 
-        elif db_dialect == 'postgresql':
+        if db_dialect == 'postgresql':
             postgres_sequences = [
                 '"author_authorID_seq"', '"patron_patronID_seq"', '"item_itemID_seq"',
                 '"checkout_checkoutID_seq"', '"item_type_typeID_seq"', '"branch_branchID_seq"',

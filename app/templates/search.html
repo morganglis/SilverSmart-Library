@@ -147,18 +147,33 @@
                         <tr>
                             <th style="padding: 5px;">First Name</th>
                             <th style="padding: 5px;">Last Name</th>
-                            <!-- <th style="padding: 5px;">Authored Books</th> -->
                         </tr>
                         <tr>
                             <td style="padding: 5px;">{{ author.firstName }}</td>
                             <td style="padding: 5px;">{{ author.lastName }}</td>
-                            <!-- {% if items %}
-                                {% for item in items %}
-                                    <td style="padding: 5px;">{{ item.itemTitle }}</td>
-                                {% endfor %}
-                            {% endif %} -->
                         </tr>
                     </table>
+                    {% if authored_books %}
+                        <h3>Books by {{ author.firstName }} {{ author.lastName }}</h3>
+                        <table style="font-size: 16px; border-spacing: 10px; border-collapse: separate;">
+                            <tr>
+                                <th>Item ID</th>
+                                <th>Title</th>
+                                <th>Publish Date</th>
+                                <th>Condition</th>
+                            </tr>
+                            {% for book in authored_books %}
+                                <tr>
+                                    <td>{{ book.itemID }}</td>
+                                    <td>{{ book.itemTitle }}</td>
+                                    <td>{{ book.publishDate.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ book.itemCondition }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        <p>No books found for this author.</p>
+                    {% endif %}
                 </div>
             {% endif %}
         </form>
@@ -200,6 +215,7 @@
                 </div>
             {% endif %}
         </form>
+
     {{ toastr.include_toastr_js() }}
 </body>
 <script>

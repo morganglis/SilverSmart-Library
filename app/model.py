@@ -30,6 +30,7 @@ class Item(db.Model):
     itemCondition = db.Column(db.String(50), default="Good")
     isSecure = db.Column(db.Boolean, default=True, nullable=False)
     inTransit = db.Column(db.Boolean, default=False, nullable=False)  # New field to track if item is in transit
+    cartStatus = db.Column(db.String(50), default="None") # New field for shelving cart status
 
     # Relationships
     checkouts = db.relationship('Checkout', backref='item', lazy='dynamic')
