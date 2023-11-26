@@ -471,22 +471,22 @@ def seed_database():
 
     db_dialect = db.engine.dialect.name
 
-    if db_dialect == 'sqlite':
-        # List of table names with autoincrement fields for SQLite
-        sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'item_branch', 'checkin']
-        for table in sqlite_tables:
-            db.engine.execute(f"DELETE FROM sqlite_sequence WHERE name='{table}'")
+    with db.engine.connect() as connection:
+        if db_dialect == 'sqlite':
+            # List of table names with autoincrement fields for SQLite
+            sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'item_branch', 'checkin']
+            for table in sqlite_tables:
+                connection.execute(f"DELETE FROM sqlite_sequence WHERE name='{table}'")
 
-    elif db_dialect == 'postgresql':
-        # List of sequence names for PostgreSQL
-        postgres_sequences = [
-            'author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
-            'checkout_checkoutID_seq', 'item_type_typeID_seq', 'branch_branchID_seq',
-            'item_branch_branchID_itemID_seq', 'checkin_checkinID_seq'
-        ]
-        for seq in postgres_sequences:
-            db.engine.execute(f"ALTER SEQUENCE {seq} RESTART WITH 1")
-
+        elif db_dialect == 'postgresql':
+            # List of sequence names for PostgreSQL
+            postgres_sequences = [
+                'author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
+                'checkout_checkoutID_seq', 'item_type_typeID_seq', 'branch_branchID_seq',
+                'item_branch_branchID_itemID_seq', 'checkin_checkinID_seq'
+            ]
+            for seq in postgres_sequences:
+                connection.execute(f"ALTER SEQUENCE {seq} RESTART WITH 1")
 
 
     # Add authors
