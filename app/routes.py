@@ -481,13 +481,16 @@ def seed_database():
         elif db_dialect == 'postgresql':
             # List of sequence names for PostgreSQL
             postgres_sequences = [
-                'author_authorID_seq', 'patron_patronID_seq', 'item_itemID_seq',
-                'checkout_checkoutID_seq', 'item_type_typeID_seq', 'branch_branchID_seq',
-                'checkin_checkinID_seq'
+                '"author_authorID_seq"',  # Using double quotes for case sensitivity
+                '"patron_patronID_seq"',
+                '"item_itemID_seq"',
+                '"checkout_checkoutID_seq"',
+                '"item_type_typeID_seq"',
+                '"branch_branchID_seq"',
+                '"checkin_checkinID_seq"'
             ]
             for seq in postgres_sequences:
                 connection.execute(text(f"ALTER SEQUENCE {seq} RESTART WITH 1"))
-
 
     # Add authors
     authors = [
