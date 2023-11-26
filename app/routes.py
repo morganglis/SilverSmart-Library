@@ -476,7 +476,7 @@ def seed_database():
             # List of table names with autoincrement fields for SQLite
             sqlite_tables = ['author', 'patron', 'item', 'checkout', 'item_type', 'branch', 'item_branch', 'checkin']
             for table in sqlite_tables:
-                connection.execute(f"DELETE FROM sqlite_sequence WHERE name='{table}'")
+                connection.execute(text(f"DELETE FROM sqlite_sequence WHERE name='{table}'"))
 
         elif db_dialect == 'postgresql':
             # List of sequence names for PostgreSQL
@@ -486,7 +486,7 @@ def seed_database():
                 'item_branch_branchID_itemID_seq', 'checkin_checkinID_seq'
             ]
             for seq in postgres_sequences:
-                connection.execute(f"ALTER SEQUENCE {seq} RESTART WITH 1")
+                connection.execute(text(f"ALTER SEQUENCE {seq} RESTART WITH 1"))
 
 
     # Add authors
