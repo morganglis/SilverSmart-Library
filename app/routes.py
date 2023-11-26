@@ -505,6 +505,14 @@ def seed_database():
     db.session.add_all(item_types)
     db.session.commit()
 
+    # Add branches
+    branches = [
+        Branch(branchID=1, name='Main', address='123 Main St.'),
+        Branch(branchID=2, name='Downtown', address='456 Downtown Ave.'),
+    ]
+    db.session.add_all(branches)
+    db.session.commit()
+
     # Add items
     items = [
         Item(itemTitle='The Great Gatsby', publishDate=datetime(1925, 4, 10), itemBranch= 1, typeID=1),
@@ -597,13 +605,7 @@ def seed_database():
     db.session.add_all(patrons)
     db.session.commit()
 
-    # Add branches
-    branches = [
-        Branch(branchID=1, name='Main', address='123 Main St.'),
-        Branch(branchID=2, name='Downtown', address='456 Downtown Ave.'),
-    ]
-    db.session.add_all(branches)
-    db.session.commit()
+
 
     item_authors =[
         ItemAuthors(authorID=1, itemID=1),
