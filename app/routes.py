@@ -468,6 +468,7 @@ def seed_database():
     db.session.query(ItemType).delete()
     db.session.query(ItemBranch).delete()
     db.session.query(Branch).delete()
+    print("deleted all records")
 
     db_dialect = db.engine.dialect.name
 
@@ -491,6 +492,7 @@ def seed_database():
             ]
             for seq in postgres_sequences:
                 connection.execute(text(f"ALTER SEQUENCE {seq} RESTART WITH 1"))
+                print (f"reset sequence {seq}")
 
     # Add authors
     authors = [
