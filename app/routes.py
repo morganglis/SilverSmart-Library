@@ -440,6 +440,7 @@ def search():
             if not author:
                 flash(f'No author found with name "{author_lastName}".', 'error')
             else:
+                authored_books = author.items.all()
                 return render_template('search.html', author=author, authored_books=authored_books)
 
     if request.method == 'GET':
