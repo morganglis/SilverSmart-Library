@@ -230,9 +230,7 @@ def checkin():
 
             # Create a new Checkin record
             new_checkin = Checkin(patronID=patron.patronID, itemID=item_id, returnDate=today)
-            save_checkout = CheckoutSaved(patronID=patron.patronID, itemID=item_id, dueDate=due_date)
             db.session.add(new_checkin)
-            db.session.add(save_checkout)
 
             # Optional: Delete the checkout record
             db.session.delete(checkout)
@@ -374,8 +372,10 @@ def checkout():
                         patron.itemsRented += 1  # Increment the number of items rented by the patron
                         due_date = datetime.utcnow() + timedelta(days=item.item_type.rentDuration)
                         new_checkout = Checkout(patronID=patron.patronID, itemID=item.itemID, dueDate=due_date)
+                        save_checkout = CheckoutSaved(patronID=patron.patronID, itemID=item_id, dueDate=due_date)
                         item.isSecure = False
                         db.session.add(new_checkout)
+                        db.session.add(save_checkout)
                         due_dates.append(due_date.strftime('%Y-%m-%d'))
                 db.session.commit()
                 flash('Items checked out successfully.', 'success')
