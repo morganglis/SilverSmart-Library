@@ -185,7 +185,7 @@
        <ul class="checkout-items">
             {% for item_id in checkout_items %}
                 {% if item_id and item_id|int in items %}
-                    <li style="text-align: center;">
+                    <li style="text-align: center; margin-right: 377px;">
                         {{ items[item_id|int].itemTitle }} added to checkout!
                         <form action="{{ url_for('checkout') }}" method="post" style="display: inline-block; background-color: transparent; border:none; box-shadow: none">
                             <input type="hidden" name="patronID" value="{{ patron.patronID }}">

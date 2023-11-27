@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
-from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors, Branch, ItemBranch, Checkin
+from app.model import Patron, ItemType, Item, Checkout, Author, ItemAuthors, Branch, ItemBranch, Checkin, CheckoutSaved
 from datetime import datetime, timedelta
 from decimal import Decimal
 from sqlalchemy import text
@@ -126,6 +126,7 @@ def database_overview():
     itemTypes = ItemType.query.all()
     items = Item.query.all()
     checkouts = Checkout.query.all()
+    checkouts_saved = CheckoutSaved.query.all()
     authors = Author.query.all()
     itemAuthors = ItemAuthors.query.all()
     branches = Branch.query.all()
@@ -138,7 +139,7 @@ def database_overview():
                            itemTypes=itemTypes, items=items,
                            checkouts=checkouts, authors=authors,
                            itemAuthors=itemAuthors, branches=branches,
-                           itemBranches=itemBranches, checkins=checkins, p=p)
+                           itemBranches=itemBranches, checkins=checkins, checkouts_saved=checkouts_saved, p=p)
 
 
 
@@ -232,7 +233,7 @@ def checkin():
             db.session.add(new_checkin)
 
             # Optional: Delete the checkout record
-            # db.session.delete(checkout)
+            db.session.delete(checkout)
 
             db.session.commit()  # Commit the changes to the database
 
@@ -311,10 +312,10 @@ def checkout():
             item = Item.query.get(item_id)
 
             if item:
-                if not item.isCheckedOut and item.isAvailable and patron.itemsRented < 20:
+                if not item.isCheckedOut and item.isAvailable and patron.itemsRented < 20 and not item.isInCart:
                     session['checkout_items'].append(item_id)
-                    item.isCheckedOut = True  # Mark the item as checked out
-                    patron.itemsRented += 1  # Increment the number of items rented by the patron
+                    item.isInCart = True  # Mark the item as checked out
+                    # patron.itemsRented += 1  # Increment the number of items rented by the patron
                     db.session.commit()  # Commit the change to the database
                     flash(f'Item {item_id} added to checkout list.', 'success')
                 elif item.isCheckedOut:
@@ -334,9 +335,7 @@ def checkout():
                 session['checkout_items'].remove(item_id_to_remove)
                 item = Item.query.get(item_id_to_remove)
                 if item:
-                    item.isCheckedOut = False
-                    if patron.itemsRented > 0:
-                        patron.itemsRented -= 1
+                    item.isInCart = False
                     db.session.commit()
                     flash(f'Item {item_id_to_remove} removed from checkout list.', 'success')
                 else:
@@ -351,7 +350,7 @@ def checkout():
             for item_id in checkout_items:
                 item = Item.query.get(item_id)
                 if item:
-                    item.isCheckedOut = False  # Reset the 'isCheckedOut' attribute for checked-out items
+                    item.isInCart = False  # Reset the 'isCheckedOut' attribute for checked-out items
                     db.session.commit()  # Commit the change to the database
 
             session.pop('checkout_items', None)
@@ -368,10 +367,15 @@ def checkout():
                 for item_id in checkout_items:
                     item = Item.query.get(item_id)
                     if item:
+                        item.isCheckedOut = True
+                        item.isInCart = False
+                        patron.itemsRented += 1  # Increment the number of items rented by the patron
                         due_date = datetime.utcnow() + timedelta(days=item.item_type.rentDuration)
                         new_checkout = Checkout(patronID=patron.patronID, itemID=item.itemID, dueDate=due_date)
+                        save_checkout = CheckoutSaved(patronID=patron.patronID, itemID=item_id, dueDate=due_date)
                         item.isSecure = False
                         db.session.add(new_checkout)
+                        db.session.add(save_checkout)
                         due_dates.append(due_date.strftime('%Y-%m-%d'))
                 db.session.commit()
                 flash('Items checked out successfully.', 'success')
@@ -462,6 +466,7 @@ def seed_database():
     # Delete records from all tables
     db.session.query(Checkin).delete()
     db.session.query(Checkout).delete()
+    db.session.query(CheckoutSaved).delete()
     db.session.query(ItemAuthors).delete()
     db.session.query(Item).delete()
     db.session.query(Author).delete()
@@ -469,6 +474,7 @@ def seed_database():
     db.session.query(ItemType).delete()
     db.session.query(ItemBranch).delete()
     db.session.query(Branch).delete()
+    session.pop('checkout_items', None)
 
 
 
