@@ -27,6 +27,10 @@
     <form action="{{ url_for('library') }}" method="get">
                 <button type="submit">Home</button>
             </form>
+    <form action="{{ url_for('seed_db_route') }}" method="post">
+                <input type="submit" value="Seed Database" />
+            </form>
+
 
     <!-- Checkout Table -->
     <h2 class="table-title">Checkouts</h2>

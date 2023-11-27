@@ -204,3 +204,45 @@ input {
     padding-top: 80px;
     min-height: calc(73vh - 80px);
 }
+
+.indexcontainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    grid-gap: 10px; /* space between images */
+    justify-content: center;
+    align-items: center;
+    padding-left: 200px;
+    padding-bottom: 20px;
+}
+
+.image-container {
+    display: inline-block; /* Inline-block will make the container fit the content */
+    position: relative; /* Set the container to relative */
+    width: 50%; /* Adjust the width as needed */
+    text-align: center; /* Center text for the label */
+}
+
+
+.image-container img {
+    width: 100%; /* The image will fill the container's width */
+    height: auto;
+    display: block; /* Ensures the image takes the full width of its container */
+}
+
+
+
+.image-container span {
+    position: absolute; /* Position the label absolutely */
+    top: 50%; /* Center vertically */
+    left: 0; /* Start from the left edge */
+    right: 0; /* Stretch to the right edge */
+    transform: translateY(-50%); /* Adjust vertical centering */
+    color: white; /* White text */
+    font-weight: bold; /* Bold text */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    padding: 5px 0; /* Padding top and bottom */
+    margin: 0; /* Remove any default margin */
+    border-radius: 5px; /* Rounded corners for background */
+}
+
+
