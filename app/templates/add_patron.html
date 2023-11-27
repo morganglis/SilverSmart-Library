@@ -59,6 +59,7 @@
             margin-bottom: 5px;
         }
     </style>
+<div class="main-content1">
 <h2>New Patron Registration</h2>
 <form action="{{ url_for('create_patron') }}" method="post">
 
@@ -83,5 +84,6 @@
     {% endfor %}
   {% endif %}
 {% endwith %}
+</div>
 {{ toastr.include_toastr_js() }}
 {%  include 'footer.html' %}

@@ -147,16 +147,19 @@
                         <tr>
                             <th style="padding: 5px;">First Name</th>
                             <th style="padding: 5px;">Last Name</th>
-                            <!-- <th style="padding: 5px;">Authored Books</th> -->
+                            <th style="padding: 5px;">Authored Books</th>
                         </tr>
                         <tr>
                             <td style="padding: 5px;">{{ author.firstName }}</td>
                             <td style="padding: 5px;">{{ author.lastName }}</td>
-                            <!-- {% if items %}
-                                {% for item in items %}
-                                    <td style="padding: 5px;">{{ item.itemTitle }}</td>
-                                {% endfor %}
-                            {% endif %} -->
+                            <td style="padding: 5px;">
+                                {% if authored_books %}
+                                    {% for book in authored_books %}
+                                        {{ book.itemTitle }}
+                                        {% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -200,7 +203,7 @@
                 </div>
             {% endif %}
         </form>
-    {{ toastr.include_toastr_js() }}
+        {{ toastr.include_toastr_js() }}
 </body>
 <script>
 </script>
