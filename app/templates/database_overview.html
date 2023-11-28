@@ -33,7 +33,25 @@
 
 
     <!-- Checkout Table -->
-    <h2 class="table-title">Checkouts</h2>
+    <h2 class="table-title">Checkout History</h2>
+    <table>
+        <tr>
+            <th>Checkout ID</th>
+            <th>Patron ID</th>
+            <th>Item ID</th>
+            <th>Due Date</th>
+        </tr>
+        {% for checkout in checkouts_saved %}
+        <tr>
+            <td>{{ checkout.checkoutID }}</td>
+            <td>{{ checkout.patronID }}</td>
+            <td>{{ checkout.itemID }}</td>
+            <td>{{ checkout.dueDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2 class="table-title">Current Checkouts</h2>
     <table>
         <tr>
             <th>Checkout ID</th>

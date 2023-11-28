@@ -59,6 +59,7 @@
             margin-bottom: 5px;
         }
     </style>
+<div class="main-content1">
 <h2>Add An Item.</h2>
 <form action="{{ url_for('create_item') }}" method="post">
 
@@ -94,5 +95,6 @@
     {% endfor %}
   {% endif %}
 {% endwith %}
+</div>
 {{ toastr.include_toastr_js() }}
 {%  include 'footer.html' %}
