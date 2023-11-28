@@ -1,5 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <title>SilverSmart Library</title>
+        {{ toastr.include_jquery() }}
+        {{ toastr.include_toastr_css() }}
+        {{ toastr.message() }}
+        <script>
+        </script>
+     <h2 style="margin-bottom: 25px; margin-top: 0px">SilverSmart Library System</h2>
 
-{% include 'header.html' %}
+</head>
+
 <style>
     body{
         background-image: url({{ url_for('static', filename='images/library_background.gif') }});
@@ -7,7 +22,7 @@
 </style>
 <body>
 
-    <h2 style="margin-bottom: 25px; margin-top: 10px">SilverSmart Library System</h2>
+
 
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
