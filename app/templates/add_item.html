@@ -65,7 +65,7 @@
 <form action="{{ url_for('create_item') }}" method="post">
 
 
-
+    <p>Enter Information Below To Add Item:</p>
     <label for="itemTitle">Item Title:</label>
     <input type="text" name="itemTitle" placeholder="itemTitle" required>
     <label for="authorFirstName">Author First Name:</label>
@@ -90,13 +90,7 @@
     <input type="submit" value="Add Item">
 
 </form>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+
 </div>
 {{ toastr.include_toastr_js() }}
 {%  include 'footer.html' %}

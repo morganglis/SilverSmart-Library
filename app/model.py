@@ -7,7 +7,7 @@ class Patron(db.Model):
     firstName = db.Column(db.String(20))
     lastName = db.Column(db.String(20))
     email = db.Column(db.String(30))
-    phoneNum = db.Column(db.String(10))
+    phoneNum = db.Column(db.String(16))
     acctBalance = db.Column(db.Numeric(10, 2))
     itemsRented = db.Column(db.SmallInteger)
     date_created = db.Column(db.DateTime, default=datetime.utcnow) # I added this to track when a patron was created so we can check if expired

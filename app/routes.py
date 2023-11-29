@@ -75,7 +75,7 @@ def create_item():
     # Attempt to commit changes to the database
     try:
         db.session.commit()
-        flash('New item and author added successfully!', 'success')
+        flash('New item added successfully!', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'An error occurred: {e}', 'error')
@@ -118,7 +118,7 @@ def create_patron():
         db.session.rollback()
         flash('An error occurred while adding the patron: {}'.format(e), 'error')
 
-    return redirect(url_for('checkout'))
+    return redirect(url_for('add_patron'))
 
 @app.route('/database-overview')
 def database_overview():
@@ -468,18 +468,25 @@ def search():
 @app.route('/shelving', methods=['GET', 'POST'])
 def shelving():
     if request.method == 'POST':
+        items_updated = False  # Flag to track if any items were updated
+
         # Handle the update logic for Shelving Cart items
         shelving_item_ids = request.form.getlist('shelving_item_ids')
-        for item_id in shelving_item_ids:
-            update_item_status(item_id)
+        if shelving_item_ids:  # Check if the list is not empty
+            for item_id in shelving_item_ids:
+                update_item_status(item_id)
+            items_updated = True
 
         # Handle the update logic for Downtown Cart items
         downtown_item_ids = request.form.getlist('downtown_item_ids')
-        for item_id in downtown_item_ids:
-            update_item_status(item_id)
+        if downtown_item_ids:  # Check if the list is not empty
+            for item_id in downtown_item_ids:
+                update_item_status(item_id)
+            items_updated = True
 
-        db.session.commit()
-        flash('Items updated successfully')
+        if items_updated:
+            db.session.commit()
+            flash('Items successfully reshelved.', 'success')
 
     # Fetch items for display
     shelving_cart_items = Item.query.filter_by(cartStatus="ShelvingCart").all()

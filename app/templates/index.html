@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/library_logo_2.png') }}">
     <title>SilverSmart Library</title>
         {{ toastr.include_jquery() }}
         {{ toastr.include_toastr_css() }}
@@ -31,7 +32,7 @@
 
     </style>
 
-    <h2>SilverSmart Library System - Click Below To Begin</h2>
+    <h2>SilverSmart Library System - Click An Option Below To Begin</h2>
 
 
 </head>
@@ -84,15 +85,7 @@
            <br>
             <a class="nav-button" href="{{ url_for('seed_db_route') }}">Seed DB</a>
             <a class="nav-button" href="{{ url_for('database_overview') }}">DB Summary</a>
-         {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="alert alert-{{ category }}">
-                    {{ message }}
-                  </div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
+         {{ toastr.include_toastr_js() }}
 
 
 
