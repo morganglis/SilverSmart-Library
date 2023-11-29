@@ -10,7 +10,7 @@ toastr = Toastr(app)
 
 app.config['TOASTR_POSITION_CLASS'] = 'toast-bottom-right'
 
-@app.route('/seed_db', methods=['POST'])
+@app.route('/seed_db', methods=['GET'])
 def seed_db_route():
     seed_database()
     # Flash a success message

@@ -11,16 +11,32 @@
         {{ toastr.message() }}
         <script>
         </script>
-    <h2 style="font-family: 'Arial', sans-serif; margin-bottom: 25px; margin-top: 0px"><strong> SilverSmart Library System</strong> <br>Click Below To Begin</h2>
+    <style>
+    body{
+        background-image: url({{ url_for('static', filename='images/library_background.gif') }});
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    h2 {
+           background-color: rgb(203, 210, 218);
+           color: black;
+           padding: 10px;
+           text-align: center;
+           width: 100%;
+           box-sizing: border-box;
+           margin-top: 20px;
+           margin-bottom: 40px;
+       }
+
+    </style>
+
+    <h2>SilverSmart Library System - Click Below To Begin</h2>
 
 
 </head>
 
-<style>
-    body{
-        background-image: url({{ url_for('static', filename='images/library_background.gif') }});
-    }
-</style>
+
 <body>
 
 
@@ -73,8 +89,12 @@
                 </a>
             </div>
         </div>
+<           <br>
+            <a class="nav-button" href="{{ url_for('seed_db_route') }}">Seed DB</a>
+            <a class="nav-button" href="{{ url_for('database_overview') }}">DB Summary</a>
 
 
-</body>
+
+
 {% include 'footer.html' %}
 
