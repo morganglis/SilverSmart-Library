@@ -1,16 +1,45 @@
-
-{% include 'header.html' %}
-<style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <title>SilverSmart Library</title>
+        {{ toastr.include_jquery() }}
+        {{ toastr.include_toastr_css() }}
+        {{ toastr.message() }}
+        <script>
+        </script>
+    <style>
     body{
         background-image: url({{ url_for('static', filename='images/library_background.gif') }});
+        padding-top: 0px;
+        padding-bottom: 0px;
     }
-</style>
+
+    h2 {
+           background-color: rgb(203, 210, 218);
+           color: black;
+           padding: 10px;
+           text-align: center;
+           width: 100%;
+           box-sizing: border-box;
+           margin-top: 20px;
+           margin-bottom: 40px;
+       }
+
+    </style>
+
+    <h2>SilverSmart Library System - Click Below To Begin</h2>
+
+
+</head>
+
+
 <body>
 
-    <h2>Welcome to the SilverSmart Library System!</h2>
-    <form action="{{ url_for('seed_db_route') }}" method="post">
-                <input type="submit" value="Seed Database" />
-            </form>
+
 
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -22,20 +51,50 @@
               {% endif %}
             {% endwith %}
 
-        <div class="container">
-
-          <div class="library_pics">
-              <img src="{{ url_for('static',filename='images/silversmart_inside.png') }}" alt="Library Pictures">
-          </div>
-  
-          <div class="books_in_stock">
-              <img src="{{ url_for('static',filename='images/books_in_stock.png') }}" alt="Books in Stock">
-          </div>
-
-
+        <div class="indexcontainer">
+            <div class="image-container">
+                <a href="{{ url_for('checkout') }}">
+                    <img src="{{ url_for('static',filename='images/silversmart_frontdesk.png') }}" alt="Check Out">
+                    <span>Check Out</span>
+                </a>
+            </div>
+            <div class="image-container">
+                <a href="{{ url_for('checkin') }}">
+                    <img src="{{ url_for('static',filename='images/books_in_stock.png') }}" alt="Check In">
+                    <span>Check In</span>
+                </a>
+            </div>
+            <div class="image-container">
+                <a href="{{ url_for('search') }}">
+                    <img src="{{ url_for('static',filename='images/search.png') }}" alt="Search">
+                    <span>Search</span>
+                </a>
+            </div>
+            <div class="image-container">
+                <a href="{{ url_for('add_patron') }}">
+                    <img src="{{ url_for('static',filename='images/patron.png') }}" alt="New Patron">
+                    <span>New Patron</span>
+                </a>
+            </div>
+            <div class="image-container">
+                <a href="{{ url_for('add_item') }}">
+                    <img src="{{ url_for('static',filename='images/item.png') }}" alt="New Item">
+                    <span>New Item</span>
+                </a>
+            </div>
+            <div class="image-container">
+                <a href="{{ url_for('shelving') }}">
+                    <img src="{{ url_for('static',filename='images/cart.png') }}" alt="Reshelving">
+                    <span>Reshelving</span>
+                </a>
+            </div>
         </div>
+<           <br>
+            <a class="nav-button" href="{{ url_for('seed_db_route') }}">Seed DB</a>
+            <a class="nav-button" href="{{ url_for('database_overview') }}">DB Summary</a>
 
 
-</body>
+
 
 {% include 'footer.html' %}
+

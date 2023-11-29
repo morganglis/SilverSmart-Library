@@ -1,0 +1,147 @@
+{% include 'header.html' %}
+<style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding-top: 80px;
+        }
+        .main-content1{
+            min-height: calc(75vh - 80px);
+        }
+        h2 {
+            background-color: rgb(203, 210, 218);
+            color: #fff;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 5px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: rgb(203, 210, 218);
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: rgb(71, 74, 74);
+        }
+        p {
+            font-weight: bold;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
+        .forms-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .form-container {
+            flex-basis: 45%; /* Adjust width of each form container */
+            margin-top: 10px;
+        }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-header {
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+
+<body>
+<h2 style="text-align: center;">Reshelving</h2>
+    <div class="main-content1">
+
+    <div class="forms-container">
+        <div class="form-container">
+            <form action="/shelving" method="post">
+                <h2>Main Branch</h2>
+                <div class="item item-header">
+                    <span>Item ID</span>
+                    <span>Title</span>
+                    <span>Reshelve</span>
+                </div>
+
+                {% for item in shelving_cart_items %}
+                    <div class="item">
+                        <span>{{ item.itemID }}</span>
+                        <span>{{ item.itemTitle }}</span>
+                        <input type="checkbox" name="shelving_item_ids" value="{{ item.itemID }}">
+                    </div>
+                {% endfor %}
+
+                <button type="submit" style="margin-top: 20px;">Update Shelving Cart Items</button>
+            </form>
+        </div>
+
+        <div class="form-container">
+            <form action="/shelving" method="post">
+                <h2>Downtown Branch</h2>
+                <div class="item item-header">
+                    <span>Item ID</span>
+                    <span>Title</span>
+                    <span>Reshelve</span>
+                </div>
+
+                {% for item in downtown_cart_items %}
+                    <div class="item">
+                        <span>{{ item.itemID }}</span>
+                        <span>{{ item.itemTitle }}</span>
+                        <input type="checkbox" name="downtown_item_ids" value="{{ item.itemID }}">
+                    </div>
+                {% endfor %}
+
+                <button type="submit" style="margin-top: 20px;">Update Downtown Cart Items</button>
+            </form>
+        </div>
+        <div class="flash-messages">
+        {% with messages = get_flashed_messages(category_filter=["success"]) %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    </div>
+
+{{ toastr.include_toastr_js() }}
+</body>
+{% include 'footer.html' %}

@@ -10,7 +10,7 @@ toastr = Toastr(app)
 
 app.config['TOASTR_POSITION_CLASS'] = 'toast-bottom-right'
 
-@app.route('/seed_db', methods=['POST'])
+@app.route('/seed_db', methods=['GET'])
 def seed_db_route():
     seed_database()
     # Flash a success message
@@ -202,20 +202,23 @@ def checkin():
                 item.itemCondition = "Damaged"
                 item.isAvailable = False
                 item.isCheckedOut = False
+                item.cartStatus = "Damaged"
                 if patron.itemsRented > 0:
                     patron.itemsRented -= 1
                 flash(f'Place {item_id} in damaged bin.', 'warning')
-            elif item.itemBranch != 'Main':
+            elif item.itemBranch == 2:
                 item.isCheckedOut = False # item is checked in
                 item.isAvailable = False # item is not available because it is in transit
                 item.inTransit = True  # Show that the item is in cart for transit
+                item.cartStatus = "DowntownCart"
                 if patron.itemsRented > 0:
                     patron.itemsRented -= 1
-                flash(f'Item {item_id} should be placed in {item.itemBranch} cart.', 'info')
+                flash(f'Item {item_id} should be placed in downtown cart.', 'info')
             else:
                 item.isCheckedOut = False
                 item.isAvailable = True
                 item.isSecure = True
+                item.cartStatus = "ShelvingCart"
                 if patron.itemsRented > 0:
                     patron.itemsRented -= 1
                 flash(f'Item {item_id} should be placed in shelving cart.', 'info')
@@ -462,6 +465,38 @@ def search():
 
     return render_template('search.html', patron=patron, item=item, author=author, damaged_books=damaged_books, checked_out=checked_out, authored_books=authored_books)
 
+@app.route('/shelving', methods=['GET', 'POST'])
+def shelving():
+    if request.method == 'POST':
+        # Handle the update logic for Shelving Cart items
+        shelving_item_ids = request.form.getlist('shelving_item_ids')
+        for item_id in shelving_item_ids:
+            update_item_status(item_id)
+
+        # Handle the update logic for Downtown Cart items
+        downtown_item_ids = request.form.getlist('downtown_item_ids')
+        for item_id in downtown_item_ids:
+            update_item_status(item_id)
+
+        db.session.commit()
+        flash('Items updated successfully')
+
+    # Fetch items for display
+    shelving_cart_items = Item.query.filter_by(cartStatus="ShelvingCart").all()
+    downtown_cart_items = Item.query.filter_by(cartStatus="DowntownCart").all()
+
+    return render_template('shelving.html',
+                           shelving_cart_items=shelving_cart_items,
+                           downtown_cart_items=downtown_cart_items)
+
+def update_item_status(item_id):
+    item = Item.query.get(item_id)
+    if item:
+        item.cartStatus = "None"
+        item.isSecure = True
+        item.inTransit = False
+        item.isAvailable = True
+
 def seed_database():
     # Delete records from all tables
     db.session.query(Checkin).delete()
@@ -475,8 +510,30 @@ def seed_database():
     db.session.query(ItemBranch).delete()
     db.session.query(Branch).delete()
     session.pop('checkout_items', None)
+    print("deleted all records")
 
+    db_dialect = db.engine.dialect.name
 
+    with db.engine.connect() as connection:
+        trans = connection.begin()  # Start a new transaction
+
+        # if db_dialect == 'sqlite':
+        #     sqlite_tables = ['Author', 'Patron', 'Item', 'Checkout', 'Item_type', 'Branch', 'Checkin']
+        #     for table in sqlite_tables:
+        #         connection.execute(text(f"DELETE FROM sqlite_sequence WHERE name='{table}'"))
+        #         print(f"SQLite sequence for table '{table}' reset")
+
+        if db_dialect == 'postgresql':
+            postgres_sequences = [
+                '"author_authorID_seq"', '"patron_patronID_seq"', '"item_itemID_seq"',
+                '"checkout_checkoutID_seq"', '"item_type_typeID_seq"', '"branch_branchID_seq"',
+                '"checkin_checkinID_seq"'
+            ]
+            for seq in postgres_sequences:
+                connection.execute(text(f"ALTER SEQUENCE {seq} RESTART WITH 1"))
+                print(f"PostgreSQL sequence {seq} reset")
+
+        trans.commit()  # Commit the transaction
 
     # Add authors
     authors = [
@@ -510,6 +567,14 @@ def seed_database():
     ]
 
     db.session.add_all(item_types)
+    db.session.commit()
+
+    # Add branches
+    branches = [
+        Branch(branchID=1, name='Main', address='123 Main St.'),
+        Branch(branchID=2, name='Downtown', address='456 Downtown Ave.'),
+    ]
+    db.session.add_all(branches)
     db.session.commit()
 
     # Add items
@@ -604,13 +669,7 @@ def seed_database():
     db.session.add_all(patrons)
     db.session.commit()
 
-    # Add branches
-    branches = [
-        Branch(branchID=1, name='Main', address='123 Main St.'),
-        Branch(branchID=2, name='Downtown', address='456 Downtown Ave.'),
-    ]
-    db.session.add_all(branches)
-    db.session.commit()
+
 
     item_authors =[
         ItemAuthors(authorID=1, itemID=1),
