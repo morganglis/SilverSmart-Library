@@ -14,6 +14,7 @@
             color: #fff;
             padding: 10px;
             text-align: center;
+            margin-bottom: 30px;
         }
         form {
             max-width: 400px;
@@ -60,7 +61,7 @@
         }
     </style>
 <div class="main-content1">
-<h2>Add An Item.</h2>
+<h2>Add Item To Library</h2>
 <form action="{{ url_for('create_item') }}" method="post">
 
 
@@ -73,18 +74,19 @@
     <input type="text" name="authorLastName" placeholder="Last Name" required>
     <label for="publishDate">Publish Date:</label>
     <input type="date" name="publishDate" required>
-    <label for="itemBranch">Choose a branch:</label>
+    <label for="itemBranch">Choose a branch:</label><br>
     <select name="itemBranch" id="branch">
         {% for branch in branches %}
             <option value="{{ branch.branchID }}">{{ branch.name }}</option>
         {% endfor %}
-    </select><br>
-    <label for="typeID">Type:</label>
+    </select>
+    <label for="typeID"><br>Choose Item Type:</label>
     <select name="typeID" id="typeID">
         {% for type in types %}
             <option value="{{ type.typeID }}">{{ type.typeName }}</option>
         {% endfor %}
     </select>
+    <br><br>
     <input type="submit" value="Add Item">
 
 </form>

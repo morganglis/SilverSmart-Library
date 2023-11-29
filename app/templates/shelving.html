@@ -93,6 +93,7 @@
         <div class="form-container">
             <form action="/shelving" method="post">
                 <h2>Main Branch</h2>
+                <p>Check The Box If You Would Like To Reshelve Item</p><br>
                 <div class="item item-header">
                     <span>Item ID</span>
                     <span>Title</span>
@@ -107,13 +108,14 @@
                     </div>
                 {% endfor %}
 
-                <button type="submit" style="margin-top: 20px;">Update Shelving Cart Items</button>
+                <button type="submit" style="margin-top: 20px;">Reshelve Checked Items</button>
             </form>
         </div>
 
         <div class="form-container">
             <form action="/shelving" method="post">
                 <h2>Downtown Branch</h2>
+                <p>Check The Box If You Would Like To Reshelve Item</p><br>
                 <div class="item item-header">
                     <span>Item ID</span>
                     <span>Title</span>
@@ -128,7 +130,7 @@
                     </div>
                 {% endfor %}
 
-                <button type="submit" style="margin-top: 20px;">Update Downtown Cart Items</button>
+                <button type="submit" style="margin-top: 20px;">Reshelve Checked Items</button>
             </form>
         </div>
         <div class="flash-messages">

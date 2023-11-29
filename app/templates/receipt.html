@@ -4,6 +4,7 @@
     <h3>Receipt</h3>
     <br>
     <p>Patron: {{ patron.firstName }} {{ patron.lastName }}</p>
+    <br>
     <p>Items Checked Out:</p><br>
     <ul class="receipt_items">
         {% for item in receipt_data %}
@@ -15,7 +16,7 @@
     <p>123 Main St. Somewhere USA 12579</p>
     <p>572-867-5309</p>
     <br>
-    <button onclick="printReceipt()" style="font-size: 20px">Print this page</button>
+    <button onclick="printReceipt()" style="font-size: 20px">Print Receipt</button>
 
     <script>
         function printReceipt() {
